@@ -19,12 +19,13 @@
 // at build time); `S` picks the compact PSP set or the scaled desktop set.
 
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
-import { Text, View } from "@pocketjs/framework/components";
+import { Image, Text, View } from "@pocketjs/framework/components";
 import * as hot from "@pocketjs/framework/hot";
 import { pushFocusScope } from "@pocketjs/framework/input";
 import { onButtonPress, onFrame } from "@pocketjs/framework/lifecycle";
 import { strike, type StrikeState } from "./sdk.ts";
-import { ROUND_FREEZE, ROUND_END_PAUSE, phaseAge } from "./rules.ts";
+import { ROUND_FREEZE, phaseAge } from "./rules.ts";
+import PlayerCrosshair from "./crosshair-preview.tsx";
 
 const TICK = 1 / 64;
 
@@ -42,6 +43,7 @@ const abgr = (hex: string): number => {
   return (((0xff << 24) | ((n & 0xff) << 16) | (n & 0xff00) | ((n >> 16) & 0xff)) >>> 0);
 };
 const INK_N = abgr(INK);
+const DIM_N = abgr(DIM);
 const AMBER_N = abgr(AMBER);
 const RED_N = abgr(RED);
 const LIME_N = abgr(LIME);
@@ -60,22 +62,34 @@ type Ref = NonNullable<Parameters<typeof hot.text>[0]>;
 
 export default function Hud() {
   const s0 = strike.state();
-  // Solid signals: RARE updates only (phase flow, score, hostiles, reserve).
+  // Solid signals: RARE updates only (phase flow and reserve).
   const [phase, setPhase] = createSignal(s0.phase);
-  const [aliveBots, setAliveBots] = createSignal(s0.aliveBots);
-  const [totalBots, setTotalBots] = createSignal(s0.totalBots);
-  const [wins, setWins] = createSignal(s0.wins);
-  const [losses, setLosses] = createSignal(s0.losses);
   const [reserve, setReserve] = createSignal(s0.reserve);
+  const [weaponName, setWeaponName] = createSignal(s0.weaponName ?? "SCORPION EVO 3");
   const [countdown, setCountdown] = createSignal(0);
+  const [multiplayer, setMultiplayer] = createSignal(s0.multiplayer);
+  const [matchLive, setMatchLive] = createSignal(s0.matchLive);
+  const [matchWinner, setMatchWinner] = createSignal(s0.matchWinner);
+  const [matchRound, setMatchRound] = createSignal(s0.matchRound);
   // SELECT opens/closes the quit dialog (BTN.SELECT = 0x0001). The mount is
   // structural but user-initiated — never on the combat hot path.
   const [dialog, setDialog] = createSignal(false);
-  onButtonPress(0x0001, () => setDialog((d) => !d));
+  onButtonPress(0x0001, () => {
+    // Desktop Escape returns directly to its in-process menu. Handhelds keep
+    // the confirmation dialog because SELECT is easier to hit accidentally.
+    if (strike.maps.length === 0) strike.toMenu();
+    else setDialog((d) => !d);
+  });
 
   // Hot refs: PER-FRAME values, written imperatively (rule 2).
   let hpText: Ref;
   let hpFill: Ref;
+  let speedText: Ref;
+  let doubleJumpGroup: Ref;
+  let doubleJumpText: Ref;
+  let doubleJumpStatus: Ref;
+  let doubleJumpPipA: Ref;
+  let doubleJumpPipB: Ref;
   let ammoText: Ref;
   let ammoFill: Ref;
   let reloadGroup: Ref;
@@ -83,6 +97,7 @@ export default function Hud() {
   let flashOverlay: Ref;
   let vignette: Ref;
   let crosshair: Ref;
+  let scopeOverlay: Ref;
   let hitmarker: Ref;
   const feedRows: Ref[] = [];
   const feedTexts: Ref[] = [];
@@ -104,7 +119,7 @@ export default function Hud() {
   strike.on("hit", (e) => {
     if (e.type !== "hit") return;
     hitmark = e.headshot ? 0.24 : 0.16;
-    if (e.fatal) pushFeed(e.headshot ? "HEADSHOT × HOSTILE DOWN" : "HOSTILE DOWN");
+    if (e.fatal) pushFeed(e.headshot ? "HEADSHOT" : "TARGET DOWN");
   });
   strike.on("roundReset", () => {
     for (let i = 0; i < FEED_ROWS; i++) feedTtl[i] = 0;
@@ -123,48 +138,63 @@ export default function Hud() {
   // real time, so the quiet-frame path below is straight-line number
   // compares on closure locals — zero function calls when nothing changed.
   let lHp = -1;
+  let lSpeed = -1;
+  let lDoubleJump = true;
   let lAmmo = -1;
+  let lMagSize = -1;
+  let lWeaponName = "";
   let lPhase = "";
-  let lBots = -1;
-  let lWins = -1;
-  let lLosses = -1;
   let lReserve = -1;
   let lCount = -1;
   let lReloading = false;
   let lAlive = true;
+  let lScope = -1;
+  let lMultiplayer = false;
+  let lMatchLive = false;
+  let lMatchWinner = -1;
+  let lMatchRound = -1;
   let lFlash = 0;
   let lHit = 0;
   onFrame(() => {
     const s = strike.state();
 
+    if (s.multiplayer !== lMultiplayer) {
+      lMultiplayer = s.multiplayer;
+      setMultiplayer(s.multiplayer);
+    }
+    if (s.matchLive !== lMatchLive) {
+      lMatchLive = s.matchLive;
+      setMatchLive(s.matchLive);
+    }
+    if (s.matchWinner !== lMatchWinner) {
+      lMatchWinner = s.matchWinner;
+      setMatchWinner(s.matchWinner);
+    }
+    if (s.matchRound !== lMatchRound) {
+      lMatchRound = s.matchRound;
+      setMatchRound(s.matchRound);
+    }
+
     if (s.phase !== lPhase) {
       lPhase = s.phase;
       setPhase(s.phase);
     }
-    if (s.phase !== "live") {
-      const left = (s.phase === "starting" ? ROUND_FREEZE : ROUND_END_PAUSE) - phaseAge();
+    if (s.phase === "starting") {
+      const left = ROUND_FREEZE - phaseAge();
       const c = Math.max(0, Math.ceil(left));
       if (c !== lCount) {
         lCount = c;
         setCountdown(c);
       }
     }
-    if (s.aliveBots !== lBots) {
-      lBots = s.aliveBots;
-      setAliveBots(s.aliveBots);
-      setTotalBots(s.totalBots);
-    }
-    if (s.wins !== lWins) {
-      lWins = s.wins;
-      setWins(s.wins);
-    }
-    if (s.losses !== lLosses) {
-      lLosses = s.losses;
-      setLosses(s.losses);
-    }
     if (s.reserve !== lReserve) {
       lReserve = s.reserve;
       setReserve(s.reserve);
+    }
+    const currentWeaponName = s.weaponName ?? "SCORPION EVO 3";
+    if (currentWeaponName !== lWeaponName) {
+      lWeaponName = currentWeaponName;
+      setWeaponName(currentWeaponName);
     }
 
     // Hot values: imperative, change-guarded, zero-layout.
@@ -177,12 +207,29 @@ export default function Hud() {
       hot.prop(hpFill, "bgColor", hpColor);
       fill(hpFill, hp / 100, BAR_W);
     }
-    if (s.ammo !== lAmmo) {
+    const speed = Math.round(s.speed);
+    if (speed !== lSpeed) {
+      lSpeed = speed;
+      hot.text(speedText, speed);
+    }
+    if (s.doubleJumpAvailable !== lDoubleJump) {
+      lDoubleJump = s.doubleJumpAvailable;
+      const color = s.doubleJumpAvailable ? LIME_N : DIM_N;
+      hot.prop(doubleJumpText, "textColor", color);
+      hot.prop(doubleJumpStatus, "textColor", color);
+      hot.text(doubleJumpStatus, s.doubleJumpAvailable ? "READY" : "SPENT");
+      hot.prop(doubleJumpPipA, "bgColor", color);
+      hot.prop(doubleJumpPipB, "bgColor", color);
+      hot.prop(doubleJumpGroup, "opacity", s.doubleJumpAvailable ? 1 : 0.62);
+    }
+    const magSize = s.magSize ?? 30;
+    if (s.ammo !== lAmmo || magSize !== lMagSize) {
       lAmmo = s.ammo;
+      lMagSize = magSize;
       hot.text(ammoText, s.ammo);
       hot.prop(ammoText, "textColor", s.ammo === 0 ? RED_N : INK_N);
       hot.prop(ammoFill, "bgColor", s.ammo <= 5 ? RED_N : LIME_N);
-      fill(ammoFill, s.ammo / 30, AMMO_BAR_W);
+      fill(ammoFill, s.ammo / Math.max(1, magSize), AMMO_BAR_W);
     }
     if (s.reloading !== lReloading) {
       lReloading = s.reloading;
@@ -192,7 +239,14 @@ export default function Hud() {
     if (s.alive !== lAlive) {
       lAlive = s.alive;
       hot.prop(vignette, "opacity", s.alive ? 0 : 0.4);
-      hot.prop(crosshair, "opacity", s.alive ? 1 : 0);
+    }
+    const scope = s.alive && s.weaponSlot === 3
+      ? Math.max(0, Math.min(1, (s.aimFraction - 0.35) / 0.57))
+      : 0;
+    if (scope !== lScope) {
+      lScope = scope;
+      hot.prop(scopeOverlay, "opacity", scope);
+      hot.prop(crosshair, "opacity", s.alive ? 1 - scope : 0);
     }
 
     if (flash > 0 || lFlash > 0) {
@@ -214,17 +268,16 @@ export default function Hud() {
     }
   });
 
-  const bannerOn = () => phase() !== "live";
-  const bannerColor = () =>
-    phase() === "won" ? LIME : phase() === "lost" ? RED : INK;
+  const bannerOn = () => (multiplayer() ? !matchLive() : phase() === "starting");
+  const bannerColor = () => multiplayer() ? LIME : INK;
   const bannerTitle = () =>
-    phase() === "won"
-      ? "HOSTILES ELIMINATED"
-      : phase() === "lost"
-        ? "YOU DIED"
-        : "ROUND START";
+    multiplayer()
+      ? matchWinner() > 0 ? `PLAYER ${matchWinner()} WINS` : "ROUND COMPLETE"
+      : "ROUND START";
   const bannerSub = () =>
-    (phase() === "starting" ? "GO IN " : "NEXT ROUND IN ") + countdown() + " ";
+    multiplayer()
+      ? `ROUND ${matchRound()} / RESETTING`
+      : "GO IN " + countdown() + " ";
 
   return (
     <View class="w-full h-full">
@@ -240,6 +293,30 @@ export default function Hud() {
         style={{ bgColor: "#2a0404", opacity: 0, zIndex: 5 }}
       />
 
+      {/* Sniper optic: dark side vision and the downloaded transparent reticle. */}
+      <View
+        ref={(el) => (scopeOverlay = el)}
+        class="absolute inset-0"
+        style={{ opacity: 0, zIndex: 9 }}
+      >
+        <View class="absolute inset-0 flex-row justify-center items-center">
+          <View style={{ width: (vp.w - vp.h) / 2, height: vp.h, bgColor: "#000000" }} />
+          <View class="relative" style={{ width: vp.h, height: vp.h }}>
+            <CircularScopeMask size={vp.h} />
+            <MilDotReticle size={vp.h} />
+          </View>
+          <View style={{ width: (vp.w - vp.h) / 2, height: vp.h, bgColor: "#000000" }} />
+        </View>
+        <View class="absolute flex-col px-2 py-1 rounded-sm" style={{ insetL: 12 * S, insetT: 12 * S, bgColor: "#020609C8", zIndex: 3 }}>
+          <Text class="text-xs font-bold tracking-wide" style={{ textColor: LIME }}>OPTIC / 8X</Text>
+          <Text class="text-xs tracking-wide" style={{ textColor: INK }}>BOLT READY · 5 RND</Text>
+        </View>
+        <View class="absolute flex-col px-2 py-1 rounded-sm" style={{ insetL: 12 * S, insetT: 42 * S, bgColor: "#020609C8", zIndex: 3 }}>
+          <Text class="text-xs font-bold tracking-wide" style={{ textColor: LIME }}>STEADY</Text>
+          <Text class="text-xs tracking-wide" style={{ textColor: DIM }}>ADS ACCURACY</Text>
+        </View>
+      </View>
+
       {/* Crosshair + hitmarker */}
       <View
         ref={(el) => (crosshair = el)}
@@ -247,7 +324,7 @@ export default function Hud() {
         style={{ zIndex: 10 }}
       >
         <View style={{ width: 36 * S, height: 36 * S }}>
-          <Cross color={LIME} gap={11 * S} len={8 * S} thick={2 * S} />
+          <PlayerCrosshair scale={S} />
           <View
             ref={(el) => (hitmarker = el)}
             class="absolute inset-0"
@@ -296,48 +373,8 @@ export default function Hud() {
               <View style={{ width: 120 * S, height: 1 * S, bgColor: bannerColor() }} />
             </View>
           </View>
-          {/* Score strip + pooled kill feed */}
+          {/* Pooled combat feed */}
           <View class="flex-col items-end gap-1" style={{ width: 90 * S }}>
-            <View
-              class={
-                S >= 2
-                  ? "flex-row items-center gap-3 px-3 py-2 rounded-md"
-                  : "flex-row items-center gap-2 px-2 py-1 rounded-sm"
-              }
-              style={{ bgColor: STRIP }}
-            >
-              <Text
-                class={
-                  S >= 2
-                    ? "text-sm font-bold tracking-wide"
-                    : "text-xs font-bold tracking-wide"
-                }
-                style={{ textColor: LIME }}
-              >
-                {"" + wins()}
-              </Text>
-              <Text
-                class={
-                  S >= 2
-                    ? "text-sm font-bold tracking-wide"
-                    : "text-xs font-bold tracking-wide"
-                }
-                style={{ textColor: RED }}
-              >
-                {"" + losses()}
-              </Text>
-              <View style={{ width: 1, height: 8 * S, bgColor: "#e8f0f240" }} />
-              <Text
-                class={
-                  S >= 2
-                    ? "text-sm font-bold tracking-wide"
-                    : "text-xs font-bold tracking-wide"
-                }
-                style={{ textColor: AMBER }}
-              >
-                {aliveBots() + "/" + totalBots()}
-              </Text>
-            </View>
             {Array.from({ length: FEED_ROWS }, (_, i) => (
               <View
                 ref={(el) => (feedRows[i] = el)}
@@ -393,6 +430,18 @@ export default function Hud() {
               >
                 100
               </Text>
+              <View class="flex-row items-end gap-1">
+                <Text class="text-xs font-bold tracking-wide" style={{ textColor: LIME }}>
+                  SPEED:
+                </Text>
+                <Text
+                  ref={(el) => (speedText = el)}
+                  class="text-xs font-bold"
+                  style={{ textColor: INK, width: 34 * S, height: 12 * S }}
+                >
+                  0
+                </Text>
+              </View>
             </View>
             <View style={{ width: BAR_W * S, height: 2 * S, bgColor: "#e8f0f21c" }}>
               <View
@@ -401,8 +450,43 @@ export default function Hud() {
               />
             </View>
           </View>
+          {/* Double-jump charge: stays mounted; spending the air jump drains
+              its color so availability is readable without extra text. */}
+          <View
+            ref={(el) => (doubleJumpGroup = el)}
+            class="flex-col items-center gap-1 px-2 py-1 rounded-sm"
+            style={{ bgColor: STRIP }}
+          >
+            <View class="flex-row gap-1">
+              <View
+                ref={(el) => (doubleJumpPipA = el)}
+                style={{ width: 8 * S, height: 2 * S, bgColor: LIME }}
+              />
+              <View
+                ref={(el) => (doubleJumpPipB = el)}
+                style={{ width: 8 * S, height: 2 * S, bgColor: LIME }}
+              />
+            </View>
+            <Text
+              ref={(el) => (doubleJumpText = el)}
+              class="text-xs font-bold tracking-wide"
+              style={{ textColor: LIME }}
+            >
+              DOUBLE JUMP
+            </Text>
+            <Text
+              ref={(el) => (doubleJumpStatus = el)}
+              class="text-xs font-bold tracking-wide"
+              style={{ textColor: LIME }}
+            >
+              READY
+            </Text>
+          </View>
           {/* Ammo: fixed mag cell / reserve + reload bar (all pre-mounted) */}
           <View class="flex-col items-end gap-1">
+            <Text class="text-xs font-bold tracking-wide" style={{ textColor: DIM }}>
+              {weaponName()}
+            </Text>
             <View
               ref={(el) => (reloadGroup = el)}
               class="flex-col items-end gap-1"
@@ -557,4 +641,35 @@ function Cross(props: {
       {bar(c + props.gap / 2, c - props.thick / 2, props.len, props.thick)}
     </View>
   );
+}
+
+/** Antialiased black peripheral mask around the scope's circular aperture. */
+function CircularScopeMask(props: { size: number }) {
+  return <Image class="absolute inset-0" style={{ width: props.size, height: props.size, zIndex: 0 }} src="sniper-scope-mask.png" />;
+}
+
+/** Scalable recreation of the downloaded MIL-DOT reticle. */
+function MilDotReticle(props: { size: number }) {
+  const c = props.size / 2;
+  const heavy = Math.max(2, 2 * S);
+  const fine = Math.max(1, S * 0.55);
+  const inner = props.size * 0.17;
+  const outer = props.size * 0.43;
+  const line = (x: number, y: number, w: number, h: number) => (
+    <View class="absolute" style={{ insetL: x, insetT: y, width: w, height: h, bgColor: "#050505" }} />
+  );
+  const dots = [-4, -3, -2, -1, 1, 2, 3, 4];
+  const dotStep = props.size * 0.035;
+  const dotSize = Math.max(2, 2.2 * S);
+  return <View class="absolute inset-0" style={{ zIndex: 2 }}>
+    {line(c - heavy / 2, c - outer, heavy, outer - inner)}
+    {line(c - heavy / 2, c + inner, heavy, outer - inner)}
+    {line(c - outer, c - heavy / 2, outer - inner, heavy)}
+    {line(c + inner, c - heavy / 2, outer - inner, heavy)}
+    {line(c - fine / 2, c - inner, fine, inner * 2)}
+    {line(c - inner, c - fine / 2, inner * 2, fine)}
+    {dots.map((step) => line(c - dotSize / 2, c + step * dotStep - dotSize / 2, dotSize, dotSize))}
+    {dots.map((step) => line(c + step * dotStep - dotSize / 2, c - dotSize / 2, dotSize, dotSize))}
+    {line(c - Math.max(1, S), c - Math.max(1, S), Math.max(2, 2 * S), Math.max(2, 2 * S))}
+  </View>;
 }

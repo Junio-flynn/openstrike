@@ -208,7 +208,13 @@ impl Bot {
                     } else {
                         player_eye
                     };
-                    effects.spawn(EffectKind::MuzzleFlash { pos: from }, 0.08);
+                    effects.spawn(
+                        EffectKind::MuzzleFlash {
+                            pos: from,
+                            direction: (aim - from).normalize_or_zero(),
+                        },
+                        0.08,
+                    );
                     effects.spawn(EffectKind::Tracer { a: from, b: aim }, 0.09);
                     if !miss {
                         let span = (cfg.damage_max - cfg.damage_min).max(0) as f32;

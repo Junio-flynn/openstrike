@@ -1,5 +1,6 @@
 //! Tiny hand-rolled CLI parsing (no deps).
 
+use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use anyhow::{Context, Result, bail};
@@ -27,6 +28,12 @@ pub struct Args {
     /// Screenshot mode: stage a combat frame with the JSX HUD composited
     /// (boots the guest, spawns bots, fires). Plain mode is a clean vista.
     pub hud: bool,
+    /// Run a LAN server in this desktop process.
+    pub host: bool,
+    /// Join a LAN server by hostname/IP (optional :port).
+    pub join: Option<String>,
+    pub port: u16,
+    pub player_name: String,
 }
 
 impl Default for Args {
@@ -43,9 +50,13 @@ impl Default for Args {
             spawn_t: false,
             script: None,
             debug_overlay: false,
-            bots: 3,
+            bots: 0,
             auto_quit: None,
             hud: false,
+            host: false,
+            join: None,
+            port: 27015,
+            player_name: std::env::var("USER").unwrap_or_else(|_| "Player".into()),
         }
     }
 }
@@ -88,12 +99,22 @@ impl Args {
                 "--bots" => a.bots = value("--bots")?.parse()?,
                 "--auto-quit" => a.auto_quit = Some(value("--auto-quit")?.parse()?),
                 "--hud" => a.hud = true,
+                "--host" => a.host = true,
+                "--join" => a.join = Some(value("--join")?),
+                "--port" => a.port = value("--port")?.parse()?,
+                "--name" => a.player_name = value("--name")?,
                 "--help" | "-h" => {
                     println!("{USAGE}");
                     std::process::exit(0);
                 }
                 other => bail!("unknown argument: {other}\n{USAGE}"),
             }
+        }
+        if a.host && a.join.is_some() {
+            bail!("--host and --join cannot be used together");
+        }
+        if a.port == 0 {
+            bail!("--port must be between 1 and 65535");
         }
         Ok(a)
     }
@@ -131,6 +152,40 @@ impl Args {
             "could not find {name}.bsp — pass --maps-dir DIR or set OPENSTRIKE_MAPS \
              (expects DIR/maps/*.bsp with DIR/support/*.wad)"
         )
+    }
+
+    /// Discover the desktop map-selection catalogue. Bundled maps are added
+    /// last so they take precedence over same-named external copies, matching
+    /// the PSP/Vita packagers.
+    pub fn map_catalogue(&self) -> Vec<(String, PathBuf)> {
+        let mut maps = BTreeMap::<String, PathBuf>::new();
+        let mut roots = Vec::new();
+        if let Some(root) = &self.maps_dir {
+            roots.push(root.clone());
+        }
+        if let Some(root) = std::env::var_os("OPENSTRIKE_MAPS") {
+            roots.push(PathBuf::from(root));
+        }
+        roots.push(PathBuf::from("assets"));
+        roots.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../assets"));
+        for root in roots {
+            for directory in [root.join("maps"), root] {
+                let Ok(entries) = std::fs::read_dir(directory) else {
+                    continue;
+                };
+                for entry in entries.flatten() {
+                    let path = entry.path();
+                    if path.extension().and_then(|value| value.to_str()) != Some("bsp") {
+                        continue;
+                    }
+                    let Some(name) = path.file_stem().and_then(|value| value.to_str()) else {
+                        continue;
+                    };
+                    maps.insert(name.to_lowercase(), path);
+                }
+            }
+        }
+        maps.into_iter().collect()
     }
 
     /// Extra directories to scan for WADs (load_map also checks siblings).
@@ -176,6 +231,10 @@ openstrike [options]
   --pitch DEG         camera pitch
   --spawn N           use the Nth CT spawn (default 0)
   --spawn-t           use a T spawn instead
-  --script NAME       run a headless scripted test (walk, model, combat, round, lose)
+  --script NAME       run a headless scripted test (walk, wallrun, model, combat, round, lose)
   --debug             show the debug overlay
-  --bots N            enemy bot count per round (default 3)";
+  --bots N            enemy bot count per round (default 0)
+  --host              host a LAN multiplayer game
+  --join HOST[:PORT]  join a LAN multiplayer game
+  --port PORT         host/default join port (default 27015)
+  --name NAME         multiplayer display name";

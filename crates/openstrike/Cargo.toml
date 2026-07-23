@@ -1,6 +1,6 @@
 [package]
 name = "openstrike"
-description = "OpenStrike: a single-player CS-like FPS on the Pocket runtime family — Pocket3D core, QuickJS gameplay mods, Solid JSX HUD"
+description = "OpenStrike: a CS-like FPS with bots and desktop LAN multiplayer on the Pocket runtime family"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -17,3 +17,4 @@ glam = { workspace = true }
 anyhow = { workspace = true }
 log = { workspace = true }
 env_logger = { workspace = true }
+rodio = { version = "0.20", default-features = false, features = ["wav"] }

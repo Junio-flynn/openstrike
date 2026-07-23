@@ -2,12 +2,14 @@
 /target
 /dist
 
-# copyrighted game data — provide your own maps (see README)
-/assets/maps/
+# Copyrighted game data stays ignored; the OpenStrike-authored arena ships.
+/assets/maps/*
+!/assets/maps/open_arena.bsp
 /assets/wads/
 
 # local tooling
 .DS_Store
+/.local/
 
 # js deps (bun run setup re-creates the solid-js link)
 /node_modules

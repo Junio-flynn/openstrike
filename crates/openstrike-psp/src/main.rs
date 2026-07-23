@@ -275,13 +275,21 @@ unsafe fn run() {
 
         sys::sceGuStart(GuContextType::Direct, host::list_ptr());
         let cam = match &game {
-            Some(g) => Camera3d {
-                pos: g.sim.player.eye_interpolated(1.0),
-                yaw: g.sim.player.yaw,
-                pitch: g.sim.player.pitch,
-                fov_y: 74f32.to_radians(),
-                ..Camera3d::default()
-            },
+            Some(g) => {
+                let (punch_pitch, punch_yaw, shot_roll) =
+                    g.sim.weapon.camera_kick_interpolated(1.0);
+                Camera3d {
+                    pos: g.sim.player.eye_interpolated(1.0),
+                    yaw: g.sim.player.yaw + punch_yaw,
+                    pitch: (g.sim.player.pitch + punch_pitch)
+                        .clamp(-89f32.to_radians(), 89f32.to_radians()),
+                    roll: g.sim.player.wall_run_camera_roll() + shot_roll,
+                    fov_y: 74f32.to_radians()
+                        + g.sim.player.wall_run_camera_fov_boost()
+                        + g.sim.aim_fov_offset_interpolated(1.0),
+                    ..Camera3d::default()
+                }
+            }
             None => Camera3d {
                 fov_y: 74f32.to_radians(),
                 ..Camera3d::default()

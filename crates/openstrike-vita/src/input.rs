@@ -76,7 +76,9 @@ impl PadInput {
                 walk: sample.buttons & BTN_UP != 0,
                 jump: sample.buttons & BTN_L != 0,
                 fire: sample.buttons & BTN_R != 0,
+                aim: false,
                 reload: pressed & BTN_DOWN != 0,
+                crouch: false,
             },
             // Positive right/down stick movement maps to the same sign as the
             // desktop host's mouse delta contract.

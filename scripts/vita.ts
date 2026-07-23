@@ -36,7 +36,8 @@ if (argv.includes("--capture")) features.push("capture");
 if (argv.includes("--bench")) features.push("bench");
 
 const mapsRoot = process.env.OPENSTRIKE_MAPS ?? `${home}/Downloads/cs-maps-20260705-1836`;
-if (!existsSync(`${mapsRoot}/maps`)) {
+const bundledMapsRoot = `${repo}assets`;
+if (!existsSync(`${mapsRoot}/maps`) && !existsSync(`${bundledMapsRoot}/maps`)) {
   console.error(`no maps dir at ${mapsRoot}/maps (set OPENSTRIKE_MAPS)`);
   process.exit(1);
 }
@@ -58,20 +59,26 @@ const pocketPlan = await compilePocketTarget("vita");
 
 // 2. Cook every map so the on-device menu owns the complete catalogue.
 mkdirSync(`${repo}dist/maps`, { recursive: true });
-const bsps = readdirSync(`${mapsRoot}/maps`)
-  .filter((file) => file.endsWith(".bsp"))
-  .sort();
+const bspSources = new Map<string, { file: string; root: string }>();
+for (const root of [mapsRoot, bundledMapsRoot]) {
+  if (!existsSync(`${root}/maps`)) continue;
+  for (const file of readdirSync(`${root}/maps`).filter((name) => name.endsWith(".bsp"))) {
+    bspSources.set(file.toLowerCase(), { file, root });
+  }
+}
+const bsps = [...bspSources.values()].sort((a, b) => a.file.localeCompare(b.file));
 if (bsps.length === 0) {
-  console.error(`no BSP maps found under ${mapsRoot}/maps`);
+  console.error("no BSP maps found in the external or bundled map roots");
   process.exit(1);
 }
-for (const file of bsps) {
+for (const { file, root } of bsps) {
   const stem = file.slice(0, -4);
-  const source = `${mapsRoot}/maps/${file}`;
+  const source = `${root}/maps/${file}`;
   const cooked = `${repo}dist/maps/${stem}.p3d`;
   if (existsSync(cooked) && statSync(cooked).mtimeMs > statSync(source).mtimeMs) continue;
   console.log(`openstrike-vita: cooking ${stem}`);
-  await $`cargo run --release -q -p pocket3d-cook -- ${source} --wads ${mapsRoot}/support --subdivide 32 -o ${cooked} --verify`.cwd(
+  const subdivision = stem === "arena_map_v3" || stem === "small_pvp_arena" ? 96 : 32;
+  await $`cargo run --release -q -p pocket3d-cook -- ${source} --wads ${root}/support --subdivide ${subdivision} -o ${cooked} --verify`.cwd(
     `${repo}vendor/pocketjs/pocket3d`,
   );
 }

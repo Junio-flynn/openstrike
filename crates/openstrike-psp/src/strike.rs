@@ -277,6 +277,12 @@ unsafe fn build_state(ctx: *mut JSContext, sim: &StrikeSim) -> JSValue {
     set_val(ctx, o, b"wins\0", JS_NewInt32(ctx, sim.score.wins as i32));
     set_val(ctx, o, b"losses\0", JS_NewInt32(ctx, sim.score.losses as i32));
     set_val(ctx, o, b"speed\0", JS_NewFloat64(ctx, sim.ground_speed() as f64));
+    set_val(
+        ctx,
+        o,
+        b"doubleJumpAvailable\0",
+        JS_NewBool(ctx, sim.player.double_jump_available()),
+    );
     o
 }
 
@@ -331,6 +337,7 @@ pub unsafe fn dispatch_menu(ctx: *mut JSContext, global: JSValue, time: f64) -> 
         set_val(ctx, o, b"wins\0", JS_NewInt32(ctx, 0));
         set_val(ctx, o, b"losses\0", JS_NewInt32(ctx, 0));
         set_val(ctx, o, b"speed\0", JS_NewFloat64(ctx, 0.0));
+        set_val(ctx, o, b"doubleJumpAvailable\0", JS_NewBool(ctx, true));
         let batch = JS_NewArray(ctx);
         let mut args = [o, batch];
         let r = JS_Call(ctx, dispatch, strike, 2, args.as_mut_ptr());

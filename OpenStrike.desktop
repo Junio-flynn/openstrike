@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=OpenStrike
+Comment=CS-like FPS with LAN multiplayer
+Exec=/home/flynnx/openstrike/pocket-open-strike/scripts/launch-desktop.sh
+Icon=/home/flynnx/openstrike/pocket-open-strike/crates/openstrike-vita/static/sce_sys/icon0.png
+Path=/home/flynnx/openstrike/pocket-open-strike
+Terminal=false
+Categories=Game;ActionGame;
+Keywords=FPS;Shooter;Counter-Strike;
+StartupNotify=true

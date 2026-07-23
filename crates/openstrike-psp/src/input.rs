@@ -50,7 +50,9 @@ impl PadInput {
             walk: buttons.contains(CtrlButtons::UP),
             jump: buttons.contains(CtrlButtons::LTRIGGER),
             fire: buttons.contains(CtrlButtons::RTRIGGER),
+            aim: false,
             reload: pressed.contains(CtrlButtons::DOWN),
+            crouch: false,
         };
 
         let mut yaw = 0.0f32;

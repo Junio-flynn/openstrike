@@ -17,7 +17,7 @@
 <p align="center"><em>A CS-like FPS on classic BSP maps — Pocket3D worlds, a PocketJS JSX HUD, gameplay in TypeScript.<br/>
 The same game targets desktop (wgpu), PSP (sceGu), and PS Vita (vita2d/GXM); the bottom shot is the real PSP running at a locked 60 fps.</em></p>
 
-A single-player CS-like FPS built on the **Pocket runtime family**: a Rust
+A CS-like FPS with single-player bots and desktop LAN multiplayer, built on the **Pocket runtime family**: a Rust
 core (Pocket3D) simulates and renders; the *product* — round rules, weapon
 tables, difficulty, and the entire HUD — is JavaScript running in an embedded
 QuickJS guest. OpenStrike is the first specialized game runtime of
@@ -116,16 +116,86 @@ cargo run --release -p openstrike -- --maps-dir ~/path/to/cs-maps
 | WASD | move (Shift = walk) |
 | Space | jump |
 | Left mouse | fire |
+| Right mouse (hold) | aim down sights |
 | R | reload |
+| F | inspect weapon |
+| 1 / 2 / 3 / 4 | Scorpion / AK-74M / UZI / bolt-action sniper |
 | Esc | release/capture mouse |
 | F3 | debug overlay |
 | V | noclip fly (debug) |
+
+Each weapon keeps independent ammunition when switching. The Scorpion has a
+30-round magazine and 2.4 s reload, the AK-74M has 30 rounds and a 2.65 s
+reload with higher damage, and the UZI has 32 rounds and a 2.3 s reload with
+a faster fire rate. The bolt-action sniper has a five-round magazine, carries
+25 reserve rounds, reloads in 3.6 s, and must cycle its bolt for 1.7 s after
+each shot; releasing and pressing fire again is required for every shot.
+Switching weapons imposes a 0.5-second draw delay before the selected weapon
+can fire.
+
+The main menu's Callsign editor saves a name up to 24 characters. LAN players
+show that name overhead while visible; labels are distance-scaled and hidden
+behind map geometry.
+
+All four weapons support hold-to-aim. Aiming smoothly narrows the field of
+view, centers and steadies the viewmodel, reduces spread to 10% of its hip-fire
+value, softens both camera and weapon recoil, and lowers movement speed to 68%.
+The sniper slows further to 40%, has intentionally extreme hip-fire spread,
+and becomes highly accurate through its stronger zoom and optical scope. The
+saved Scope Multiplier setting scales scoped mouse input from 0.1 to 2.0;
+`1.0` keeps the normal angular sensitivity unchanged.
+
+Desktop play includes self-contained effects for each weapon, footsteps,
+wall-running, aiming, reloading, landing, impacts, damage, weapon switching,
+and empty magazines. If no audio device is available, the game logs a warning
+and continues normally.
 
 Options: `--map de_inferno`, `--bots 5`, `--spawn-t`, `--auto-quit 5`.
 
 Round rules (v0.1, see `game/rules.ts`): eliminate every bot to win; die and
 you lose. Either way the round resets automatically and the score carries
 over.
+
+### macOS LAN multiplayer and shareable app
+
+The desktop build includes an in-game LAN lobby and a redistributable
+`open_arena` map with two opposite player spawns. The arena and its procedural
+texture WAD are OpenStrike-owned, so the receiving player does not need to
+install Counter-Strike data before playing it.
+
+Build the shareable application on a Mac:
+
+```sh
+bun run package:mac
+```
+
+This produces a universal Apple Silicon + Intel build at
+`dist/OpenStrike-macOS.zip`. Send that single ZIP to the other player. Both
+players unzip it and open `OpenStrike.app`; if macOS blocks the
+first launch, right-click the app and choose **Open**. Allow local-network and
+firewall access when prompted.
+
+Inside OpenStrike:
+
+1. Both players select **Multiplayer**.
+2. One selects **Create LAN Lobby**.
+3. The other player's lobby browser finds it automatically; they select
+   **Join**. No IP address is needed.
+4. The host selects **Start Match**. Player 1 and Player 2 are placed at the
+   two opposite arena spawns automatically.
+
+To test multiplayer on one computer, open **LAN Lobby** and select
+**Open Second Window**. OpenStrike hosts in the current window and launches a
+second instance as `Local Player 2` over localhost. When both players show as
+ready, select **Start Match** in the first window. Leaving the test lobby or
+closing the first window also closes the test client it launched.
+
+The host relays movement, stance, weapons, health, and hitscan shots over UDP.
+OpenStrike uses ports `27015` and `27016` for the match and discovery. This
+version is intended for trusted LANs: it has no internet matchmaking, NAT
+traversal, dedicated server, encryption, or anti-cheat. The command-line
+`--host`, `--join`, `--port`, and `--name` options remain available for
+development and direct connections.
 
 ## Headless verification
 
@@ -136,6 +206,7 @@ tested:
 
 ```sh
 cargo run --release -p openstrike -- --maps-dir $MAPS --script walk   --screenshot out/walk
+cargo run --release -p openstrike -- --maps-dir $MAPS --map open_arena --script wallrun
 cargo run --release -p openstrike -- --maps-dir $MAPS --script model  --screenshot out/model
 cargo run --release -p openstrike -- --maps-dir $MAPS --script combat --screenshot out/combat
 cargo run --release -p openstrike -- --maps-dir $MAPS --script round  --screenshot out/round
@@ -145,6 +216,8 @@ cargo run --release -p openstrike -- --maps-dir $MAPS --script lose   --screensh
 - `walk` — spawn, run at 250 u/s, slide along walls without clipping, jump
   exactly ~45 units, and hold the viewmodel anti-jitter invariant (the gun
   must ride the interpolated camera, not the raw tick state).
+- `wallrun` — use an `open_arena` parkour lane, verify the rising/falling
+  wallrun arc and speed boost, then spend the refreshed double jump.
 - `model` — the soldier renders and its clips actually animate.
 - `combat` — aim, fire, tracers/flash, a bot takes three body shots and dies.
 - `round` — observe bot AI, engage, eliminate all, **win** (scored by the JS
@@ -229,9 +302,9 @@ The `strike` surface currently speaks: state snapshots (`hp`, `ammo`,
 PocketJS `ui` surface. Both mount into one realm — a mod can restyle the
 HUD and rewrite the rules in the same file.
 
-Out of scope for v0.1: multiple weapons, buy phases, waypointed bot
-navigation, networking, and a stable mod-distribution format. The surface
-grows by appending, never by renumbering.
+Out of scope for v0.1: buy phases, waypointed bot navigation, internet
+matchmaking/dedicated servers, and a stable mod-distribution format. The
+surface grows by appending, never by renumbering.
 
 ## Assets
 

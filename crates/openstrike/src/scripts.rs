@@ -2,6 +2,7 @@
 //! This is how CI (and the agent that built this) verifies the game plays.
 
 use anyhow::{Context, Result, bail};
+use openstrike_core::EffectKind;
 use pocket3d::input::Input;
 use pocket3d::prelude::*;
 use pocket3d::winit::event::MouseButton;
@@ -114,6 +115,7 @@ pub fn run_screenshot(mut game: OpenStrike, args: &Args) -> Result<()> {
     if !args.hud {
         // Clean vista: clear bots, settle, look slightly down the map.
         game.bots.clear();
+        game.weapon_assets = [None, None, None, None];
         if args.pos.is_none() {
             settle(&mut game, 48);
         }
@@ -122,7 +124,7 @@ pub fn run_screenshot(mut game: OpenStrike, args: &Args) -> Result<()> {
 
     // Staged combat with the HUD. Boot the guest so the shipped rules + HUD
     // are what gets captured.
-    let mut strike = StrikeGuest::boot(args.size)?;
+    let mut strike = StrikeGuest::boot(args.size, &args.player_name, &[])?;
     place_bots_near_player(&mut game, 3);
     let mut input = Input::default();
     // ~1.6 s of approach: bots chase and animate, the player tracks the
@@ -154,8 +156,195 @@ pub fn run_script(game: OpenStrike, name: &str, args: &Args) -> Result<()> {
         "combat" => combat_script(game, args),
         "round" => round_script(game, args),
         "lose" => lose_script(game, args),
-        other => bail!("unknown script: {other} (available: walk, model, combat, round, lose)"),
+        "wallrun" => wallrun_script(game),
+        other => {
+            bail!("unknown script: {other} (available: walk, wallrun, model, combat, round, lose)")
+        }
     }
+}
+
+/// Generated-arena parkour acceptance: enter the west wallrun lane while
+/// falling, follow its rising/falling arc, chain three wall runs, then verify
+/// that each wall kick grants exactly one follow-up jump.
+fn wallrun_script(mut game: OpenStrike) -> Result<()> {
+    game.phase = Phase::Live;
+    game.bots.clear();
+
+    // A jump begun while already beside the wall must remain an ordinary
+    // jump. Holding that same press cannot arm a wall run on the next frame.
+    game.player.state.pos = Vec3::new(-938.0, 36.0, 0.0);
+    game.player.prev_pos = game.player.state.pos;
+    game.player.state.vel = Vec3::ZERO;
+    game.player.state.on_ground = true;
+    game.player.yaw = std::f32::consts::PI;
+    let mut input = Input::default();
+    input.inject_key(KeyCode::KeyW, true);
+    input.inject_key(KeyCode::Space, true);
+    for _ in 0..8 {
+        game.tick(TICK, &input);
+        if game.player.wall_run_camera_roll() != 0.0 {
+            bail!("FAIL wallrun gate: held ground jump started a wall run");
+        }
+    }
+    input.inject_key(KeyCode::Space, false);
+    game.tick(TICK, &input);
+    println!("PASS wallrun gate: ground jump beside wall stayed a normal jump");
+
+    // A separate press while already airborne still enters the lane.
+    game.player.state.pos = Vec3::new(-938.0, 80.0, 0.0);
+    game.player.prev_pos = game.player.state.pos;
+    game.player.state.vel = Vec3::new(0.0, -40.0, 240.0);
+    game.player.state.on_ground = false;
+    game.player.yaw = std::f32::consts::PI;
+
+    // Wall-run entry is contact + jump; forward input is optional.
+    input.inject_key(KeyCode::KeyW, false);
+    input.inject_key(KeyCode::Space, true);
+    let east_trace = game.map.collision.trace(
+        pocket3d::bsp::Hull::Stand,
+        game.player.state.pos,
+        game.player.state.pos + Vec3::X * 20.0,
+    );
+    game.tick(TICK, &input);
+    let entry_vy = game.player.state.vel.y;
+    let entry_speed = Vec2::new(game.player.state.vel.x, game.player.state.vel.z).length();
+    let entry_roll = game.player.wall_run_camera_roll().abs();
+    if entry_vy <= 100.0 || entry_speed < 235.0 {
+        bail!(
+            "FAIL wallrun entry: vy {entry_vy:.1}, speed {entry_speed:.1}, east trace {:.2} {:?}",
+            east_trace.fraction,
+            east_trace.normal
+        );
+    }
+    if !(0.0 < entry_roll && entry_roll < 20.0_f32.to_radians()) {
+        bail!("FAIL wallrun camera: entry roll did not ease in ({entry_roll})");
+    }
+
+    let run_start = game.player.state.pos;
+    let mut lowest_vy = entry_vy;
+    for _ in 0..100 {
+        game.tick(TICK, &input);
+        lowest_vy = lowest_vy.min(game.player.state.vel.y);
+    }
+    if lowest_vy >= 0.0 {
+        bail!("FAIL wallrun arc: vertical speed never turned downward ({lowest_vy:.1})");
+    }
+    let run_distance = Vec2::new(
+        game.player.state.pos.x - run_start.x,
+        game.player.state.pos.z - run_start.z,
+    )
+    .length();
+    let run_fov_boost = game.player.wall_run_camera_fov_boost();
+    if !game.player.is_wall_running()
+        || run_distance < 350.0
+        || run_fov_boost < 2.0_f32.to_radians()
+    {
+        bail!(
+            "FAIL wallrun reach: active {}, distance {run_distance:.1}, FOV boost {:.1}",
+            game.player.is_wall_running(),
+            run_fov_boost.to_degrees(),
+        );
+    }
+
+    // Turn and look upward before releasing: yaw should control the launch,
+    // while pitch must not introduce a vertical launch component.
+    game.player.yaw = std::f32::consts::PI * 0.75;
+    game.player.pitch = 20.0_f32.to_radians();
+    let release_direction = game.player.forward_flat();
+    input.inject_key(KeyCode::Space, false);
+    game.tick(TICK, &input);
+    let wall_jump_speed = game.player.state.vel.length();
+    let wall_jump_horizontal = Vec3::new(game.player.state.vel.x, 0.0, game.player.state.vel.z);
+    let wall_jump_alignment = wall_jump_horizontal
+        .normalize_or_zero()
+        .dot(release_direction);
+    if wall_jump_speed < 395.0
+        || wall_jump_alignment < 0.99
+        || !(90.0..=140.0).contains(&game.player.state.vel.y)
+    {
+        bail!(
+            "FAIL wall release: speed {wall_jump_speed:.1}, horizontal alignment {wall_jump_alignment:.3}, vy {:.1}",
+            game.player.state.vel.y,
+        );
+    }
+    let exit_roll = game.player.wall_run_camera_roll().abs();
+    if !(0.0 < exit_roll && exit_roll < 20.0_f32.to_radians()) {
+        bail!("FAIL wallrun camera: exit roll did not ease out ({exit_roll})");
+    }
+
+    // A wall kick grants one follow-up jump, never two.
+    // Move clear of wall contact so a new wall-run entry does not take
+    // priority over the jump-budget assertion.
+    game.player.state.pos = Vec3::new(0.0, 80.0, 0.0);
+    game.player.prev_pos = game.player.state.pos;
+    game.player.state.on_ground = false;
+    game.tick(TICK, &input);
+    input.inject_key(KeyCode::Space, true);
+    game.tick(TICK, &input);
+    input.inject_key(KeyCode::Space, false);
+    let followup_vy = game.player.state.vel.y;
+    game.tick(TICK, &input);
+    let before_second = game.player.state.vel.y;
+    input.inject_key(KeyCode::Space, true);
+    game.tick(TICK, &input);
+    if followup_vy <= 200.0 || game.player.state.vel.y >= before_second {
+        bail!("FAIL wall jump budget: expected exactly one follow-up jump");
+    }
+
+    // The wall just used remains locked until a different wall is used.
+    input.inject_key(KeyCode::Space, false);
+    game.tick(TICK, &input);
+    game.player.state.pos = Vec3::new(-938.0, 80.0, 0.0);
+    game.player.prev_pos = game.player.state.pos;
+    game.player.state.vel = Vec3::new(0.0, -40.0, 240.0);
+    game.player.state.on_ground = false;
+    game.player.yaw = std::f32::consts::PI;
+    input.inject_key(KeyCode::Space, true);
+    game.tick(TICK, &input);
+    if game.player.is_wall_running() {
+        bail!("FAIL wall identity: reused the same wall consecutively");
+    }
+
+    // Use the opposite wall, then return to the original wall. Both entries
+    // occur in the same airborne life and each ends with an immediate kick.
+    for run in 2..=3 {
+        input.inject_key(KeyCode::Space, false);
+        game.tick(TICK, &input);
+        let wall_x = if run == 2 { 938.0 } else { -938.0 };
+        game.player.state.pos = Vec3::new(wall_x, 80.0, 0.0);
+        game.player.prev_pos = game.player.state.pos;
+        game.player.state.vel = Vec3::new(0.0, -40.0, 240.0);
+        game.player.state.on_ground = false;
+        game.player.yaw = std::f32::consts::PI;
+        input.inject_key(KeyCode::Space, true);
+        game.tick(TICK, &input);
+        if !game.player.is_wall_running() {
+            bail!("FAIL wallrun chain: run {run} did not start");
+        }
+        input.inject_key(KeyCode::Space, false);
+        game.tick(TICK, &input);
+    }
+
+    // A fourth entry before landing is rejected.
+    game.player.state.pos = Vec3::new(-938.0, 80.0, 0.0);
+    game.player.prev_pos = game.player.state.pos;
+    game.player.state.vel = Vec3::new(0.0, -40.0, 240.0);
+    game.player.state.on_ground = false;
+    game.player.yaw = std::f32::consts::PI;
+    input.inject_key(KeyCode::Space, true);
+    game.tick(TICK, &input);
+    if game.player.is_wall_running() {
+        bail!("FAIL wallrun chain: allowed a fourth run before landing");
+    }
+
+    input.inject_key(KeyCode::Space, false);
+    game.tick(TICK, &input);
+    println!(
+        "PASS wallrun: entry {entry_speed:.1}, reach {run_distance:.1}, dynamic camera +{:.1}deg FOV, distinct-wall chain, horizontal release {wall_jump_alignment:.3}, one follow-up jump",
+        run_fov_boost.to_degrees(),
+    );
+    println!("WALLRUN SCRIPT PASSED");
+    Ok(())
 }
 
 /// Place bots at CT spawns near the player so an encounter is guaranteed
@@ -182,7 +371,7 @@ fn round_script(mut game: OpenStrike, args: &Args) -> Result<()> {
     let base = args.screenshot.clone();
 
     // The gameplay mod (JS) owns phase transitions; boot the guest.
-    let mut strike = StrikeGuest::boot(args.size)?;
+    let mut strike = StrikeGuest::boot(args.size, &args.player_name, &[])?;
     place_bots_near_player(&mut game, 3);
     game.phase = Phase::Starting;
     let bot_start: Vec<Vec3> = game.bots.iter().map(|b| b.state.pos).collect();
@@ -345,7 +534,7 @@ fn lose_script(mut game: OpenStrike, args: &Args) -> Result<()> {
     game.upload_world(&hl.gpu, &hl.renderer);
     let base = args.screenshot.clone();
 
-    let mut strike = StrikeGuest::boot(args.size)?;
+    let mut strike = StrikeGuest::boot(args.size, &args.player_name, &[])?;
     place_bots_near_player(&mut game, 3);
     game.phase = Phase::Starting;
 
@@ -401,7 +590,7 @@ fn lose_script(mut game: OpenStrike, args: &Args) -> Result<()> {
 }
 
 /// Movement acceptance: settle on ground, run forward, never clip into
-/// solid, jump and land.
+/// solid, double-jump, and land.
 fn walk_script(mut game: OpenStrike, args: &Args) -> Result<()> {
     let mut hl = Headless::new(args.size)?;
     game.upload_world(&hl.gpu, &hl.renderer);
@@ -460,13 +649,36 @@ fn walk_script(mut game: OpenStrike, args: &Args) -> Result<()> {
             .iter()
             .map(|o| (*o - offsets[0]).length())
             .fold(0.0f32, f32::max);
-        // Bob phase advances a hair across alphas (it is time-based), so allow
-        // sub-visible wiggle; the broken (tick-anchored) gun drifts ~2 units.
-        if max_drift > 0.2 {
-            bail!("FAIL viewmodel: gun drifts {max_drift:.3} units against the camera across render alphas");
+        // Bob and movement sway advance across alphas, so allow their small
+        // intentional motion; a tick-anchored gun still drifts ~2 units.
+        if max_drift > 0.3 {
+            bail!(
+                "FAIL viewmodel: gun drifts {max_drift:.3} units against the camera across render alphas"
+            );
         }
         println!("PASS viewmodel: camera-space drift across alphas {max_drift:.4} units");
     }
+
+    // Horizontal camera motion gives the weapon a short interpolated lag,
+    // then it recenters when look input stops.
+    game.apply_look(16.0, 0.0);
+    game.tick(TICK, &input);
+    let look_sway = game.player.viewmodel_look_sway().abs();
+    for _ in 0..40 {
+        game.tick(TICK, &input);
+    }
+    let settled_sway = game.player.viewmodel_look_sway().abs();
+    if look_sway < 0.5_f32.to_radians() || settled_sway >= look_sway {
+        bail!(
+            "FAIL viewmodel look sway: impulse {:.2}, settled {:.2} degrees",
+            look_sway.to_degrees(),
+            settled_sway.to_degrees(),
+        );
+    }
+    println!(
+        "PASS viewmodel look sway: {:.2} degree lag settles smoothly",
+        look_sway.to_degrees()
+    );
 
     // 3) Keep running into whatever is ahead for 6s; we must never leave the
     // map, never NaN, never end up inside solid.
@@ -498,7 +710,7 @@ fn walk_script(mut game: OpenStrike, args: &Args) -> Result<()> {
         hl.shot(&mut game, 8.0, &format!("{base}.run.png"))?;
     }
 
-    // 4) Jump: gain height, land within 1.5s.
+    // 4) Jump: gain height and land with standard gravity.
     settle(&mut game, 32);
     let ground_y = game.player.state.pos.y;
     input.inject_key(KeyCode::Space, true);
@@ -527,6 +739,146 @@ fn walk_script(mut game: OpenStrike, args: &Args) -> Result<()> {
     println!(
         "PASS jump: height {height:.1} units, landed after {:.2}s",
         landed as f32 * TICK
+    );
+
+    // 5) Double jump: one airborne press launches again, a third press does
+    // nothing, and landing restores both jumps.
+    input.inject_key(KeyCode::Space, true);
+    game.tick(TICK, &input);
+    input.inject_key(KeyCode::Space, false);
+    for _ in 0..10 {
+        game.tick(TICK, &input);
+    }
+    input.inject_key(KeyCode::Space, true);
+    game.tick(TICK, &input);
+    input.inject_key(KeyCode::Space, false);
+    let second_jump_vy = game.player.state.vel.y;
+    if second_jump_vy <= 200.0 {
+        bail!("FAIL double jump: second jump vy {second_jump_vy}");
+    }
+    if !game
+        .effects
+        .list
+        .iter()
+        .any(|effect| matches!(effect.kind, EffectKind::DoubleJumpBurst { .. }))
+    {
+        bail!("FAIL double jump: foot particle burst was not spawned");
+    }
+    if let Some(base) = &shot_base {
+        let pitch = game.player.pitch;
+        game.player.pitch = -65.0f32.to_radians();
+        hl.shot(&mut game, 9.0, &format!("{base}.double_jump.png"))?;
+        game.player.pitch = pitch;
+    }
+    game.tick(TICK, &input);
+    let before_third = game.player.state.vel.y;
+    input.inject_key(KeyCode::Space, true);
+    game.tick(TICK, &input);
+    input.inject_key(KeyCode::Space, false);
+    if game.player.state.vel.y >= before_third {
+        bail!(
+            "FAIL double jump: third press increased vy from {before_third} to {}",
+            game.player.state.vel.y
+        );
+    }
+    settle(&mut game, 128);
+    input.inject_key(KeyCode::Space, true);
+    game.tick(TICK, &input);
+    input.inject_key(KeyCode::Space, false);
+    if game.player.state.vel.y <= 100.0 {
+        bail!(
+            "FAIL double jump reset: vy {} after landing",
+            game.player.state.vel.y
+        );
+    }
+    println!("PASS double jump: second jump launched, third was blocked, landing reset jumps");
+
+    // 6) Holding jump should automatically launch again after touching down.
+    settle(&mut game, 128);
+    input.inject_key(KeyCode::Space, true);
+    game.tick(TICK, &input);
+    let mut touched_ground = false;
+    let mut jumped_again = false;
+    for _ in 0..128 {
+        let was_grounded = game.player.state.on_ground;
+        game.tick(TICK, &input);
+        if game.player.state.on_ground {
+            touched_ground = true;
+        }
+        if touched_ground && was_grounded && game.player.state.vel.y > 100.0 {
+            jumped_again = true;
+            break;
+        }
+    }
+    input.inject_key(KeyCode::Space, false);
+    if !jumped_again {
+        bail!("FAIL held jump: player did not jump again after landing");
+    }
+    println!("PASS held jump: landing automatically launched the next jump");
+
+    // 7) Landing shaves a small, predictable amount from horizontal speed.
+    settle(&mut game, 128);
+    game.player.state.vel.x = 50.0;
+    game.player.state.vel.z = 0.0;
+    input.inject_key(KeyCode::Space, true);
+    game.tick(TICK, &input);
+    input.inject_key(KeyCode::Space, false);
+    let takeoff_speed = Vec2::new(game.player.state.vel.x, game.player.state.vel.z).length();
+    let mut landing_speed = None;
+    for _ in 0..128 {
+        game.tick(TICK, &input);
+        if game.player.state.on_ground {
+            landing_speed =
+                Some(Vec2::new(game.player.state.vel.x, game.player.state.vel.z).length());
+            break;
+        }
+    }
+    let Some(landing_speed) = landing_speed else {
+        bail!("FAIL landing speed: player did not land");
+    };
+    if !(landing_speed < takeoff_speed && landing_speed > takeoff_speed * 0.95) {
+        bail!("FAIL landing speed: changed from {takeoff_speed:.1} to {landing_speed:.1}");
+    }
+    println!("PASS landing speed: reduced slightly from {takeoff_speed:.1} to {landing_speed:.1}");
+
+    // 8) Sliding camera roll responds only to left/right steering and does
+    // not inherit the wall-run FOV expansion.
+    settle(&mut game, 64);
+    game.player.state.pos = Vec3::new(0.0, 36.0, 500.0);
+    game.player.prev_pos = game.player.state.pos;
+    game.player.state.on_ground = true;
+    let forward = game.player.forward_flat();
+    game.player.state.vel = forward * 400.0;
+    input.inject_key(KeyCode::KeyW, true);
+    input.inject_key(KeyCode::KeyA, true);
+    input.inject_key(KeyCode::ControlLeft, true);
+    for _ in 0..8 {
+        game.tick(TICK, &input);
+    }
+    let left_roll = game.player.wall_run_camera_roll();
+    input.inject_key(KeyCode::KeyA, false);
+    input.inject_key(KeyCode::KeyD, true);
+    for _ in 0..12 {
+        game.tick(TICK, &input);
+    }
+    let right_roll = game.player.wall_run_camera_roll();
+    if !game.player.sliding
+        || left_roll >= -2.0_f32.to_radians()
+        || right_roll <= 2.0_f32.to_radians()
+        || game.player.wall_run_camera_fov_boost() > 0.1_f32.to_radians()
+    {
+        bail!(
+            "FAIL slide camera: sliding {}, rolls {:.1}/{:.1}, FOV {:.1}",
+            game.player.sliding,
+            left_roll.to_degrees(),
+            right_roll.to_degrees(),
+            game.player.wall_run_camera_fov_boost().to_degrees(),
+        );
+    }
+    println!(
+        "PASS slide camera: left/right roll {:.1}/{:.1} degrees",
+        left_roll.to_degrees(),
+        right_roll.to_degrees(),
     );
 
     println!("WALK SCRIPT PASSED");
@@ -582,6 +934,34 @@ fn model_script(mut game: OpenStrike, args: &Args) -> Result<()> {
         bail!("FAIL model: poses at t=0.25 and t=0.75 differ on only {pct:.3}% of pixels");
     }
     println!("PASS model: animation poses differ on {pct:.2}% of pixels");
+
+    // Keep a direct first-person snapshot of the imported sniper in the
+    // acceptance output. This catches asset-space orientation and scaling
+    // regressions that skeletal clip loading alone cannot reveal.
+    game.bots.clear();
+    if !game.select_weapon(3) {
+        bail!("FAIL model: could not select sniper slot");
+    }
+    let sniper_path = format!("{base}.sniper.png");
+    hl.shot(&mut game, 1.0, &sniper_path)?;
+    println!("PASS model: sniper viewmodel rendered");
+    if std::env::var_os("OPENSTRIKE_SCOPE_CAPTURE").is_some() {
+        let mut strike = StrikeGuest::boot(args.size, &args.player_name, &[])?;
+        game.match_started = true;
+        strike.turn_with_buttons(&mut game, 0)?;
+        let mut aim = Input::default();
+        aim.inject_mouse_button(MouseButton::Right, true);
+        for _ in 0..48 {
+            game.tick(TICK, &aim);
+            strike.turn(&mut game)?;
+        }
+        hl.shot_with_hud(
+            &mut game,
+            Some(&mut strike),
+            1.75,
+            &format!("{base}.scope.png"),
+        )?;
+    }
     println!("MODEL SCRIPT PASSED");
     Ok(())
 }

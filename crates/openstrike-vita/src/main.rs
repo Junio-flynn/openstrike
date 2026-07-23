@@ -206,13 +206,21 @@ mod vita {
             graphics::begin_frame(0xff00_0000);
             frame_pool.reset();
             let camera = match &game {
-                Some(current) => Camera3d {
-                    pos: current.sim.player.eye_interpolated(1.0),
-                    yaw: current.sim.player.yaw,
-                    pitch: current.sim.player.pitch,
-                    fov_y: 74f32.to_radians(),
-                    ..Camera3d::default()
-                },
+                Some(current) => {
+                    let (punch_pitch, punch_yaw, shot_roll) =
+                        current.sim.weapon.camera_kick_interpolated(1.0);
+                    Camera3d {
+                        pos: current.sim.player.eye_interpolated(1.0),
+                        yaw: current.sim.player.yaw + punch_yaw,
+                        pitch: (current.sim.player.pitch + punch_pitch)
+                            .clamp(-89f32.to_radians(), 89f32.to_radians()),
+                        roll: current.sim.player.wall_run_camera_roll() + shot_roll,
+                        fov_y: 74f32.to_radians()
+                            + current.sim.player.wall_run_camera_fov_boost()
+                            + current.sim.aim_fov_offset_interpolated(1.0),
+                        ..Camera3d::default()
+                    }
+                }
                 None => Camera3d {
                     fov_y: 74f32.to_radians(),
                     ..Camera3d::default()

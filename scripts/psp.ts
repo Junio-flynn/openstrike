@@ -30,7 +30,8 @@ if (argv.includes("--capture")) features.push("capture");
 if (argv.includes("--bench")) features.push("bench");
 
 const mapsRoot = process.env.OPENSTRIKE_MAPS ?? `${home}/Downloads/cs-maps-20260705-1836`;
-if (!existsSync(`${mapsRoot}/maps`)) {
+const bundledMapsRoot = `${repo}assets`;
+if (!existsSync(`${mapsRoot}/maps`) && !existsSync(`${bundledMapsRoot}/maps`)) {
   console.error(`no maps dir at ${mapsRoot}/maps (set OPENSTRIKE_MAPS)`);
   process.exit(1);
 }
@@ -43,16 +44,23 @@ const pocketPlan = await compilePocketTarget("psp");
 // 32-unit light grid: samples every other GoldSrc luxel — crisp baked
 // shadows for ~0.9 MB more map (GE headroom is huge, this is cheap).
 mkdirSync(`${repo}dist/maps`, { recursive: true });
-const bsps = readdirSync(`${mapsRoot}/maps`)
-  .filter((f) => f.endsWith(".bsp"))
-  .sort();
-for (const f of bsps) {
+const bspSources = new Map<string, { file: string; root: string }>();
+for (const root of [mapsRoot, bundledMapsRoot]) {
+  if (!existsSync(`${root}/maps`)) continue;
+  for (const file of readdirSync(`${root}/maps`).filter((name) => name.endsWith(".bsp"))) {
+    // Bundled OpenStrike maps intentionally replace same-named external maps.
+    bspSources.set(file.toLowerCase(), { file, root });
+  }
+}
+const bsps = [...bspSources.values()].sort((a, b) => a.file.localeCompare(b.file));
+for (const { file: f, root } of bsps) {
   const stem = f.slice(0, -4);
-  const src = `${mapsRoot}/maps/${f}`;
+  const src = `${root}/maps/${f}`;
   const p3d = `${repo}dist/maps/${stem}.p3d`;
   if (existsSync(p3d) && statSync(p3d).mtimeMs > statSync(src).mtimeMs) continue;
   console.log(`openstrike-psp: cooking ${stem}`);
-  await $`cargo run --release -q -p pocket3d-cook -- ${src} --wads ${mapsRoot}/support --subdivide 32 -o ${p3d} --verify`.cwd(
+  const subdivision = stem === "arena_map_v3" || stem === "small_pvp_arena" ? 96 : 32;
+  await $`cargo run --release -q -p pocket3d-cook -- ${src} --wads ${root}/support --subdivide ${subdivision} -o ${p3d} --verify`.cwd(
     `${repo}vendor/pocketjs/pocket3d`,
   );
 }
