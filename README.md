@@ -57,7 +57,7 @@ game grants itself no privileges a mod wouldn't have.
 ## Building
 
 ```sh
-git clone --recursive https://github.com/pocket-stack/open-strike
+git clone --recursive https://github.com/Junio-flynn/openstrike.git
 cd open-strike
 bun run setup      # installs the vendored framework deps + solid-js link
 bun run bootstrap  # install the pinned PSP toolchain into the shared cache
