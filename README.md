@@ -175,6 +175,18 @@ players unzip it and open `OpenStrike.app`; if macOS blocks the
 first launch, right-click the app and choose **Open**. Allow local-network and
 firewall access when prompted.
 
+Build the Linux desktop application on an x86_64 Linux machine:
+
+```sh
+bun run package:linux
+```
+
+This produces `dist/OpenStrike-linux-x86_64.tar.gz`. Extract it and run
+`OpenStrike-linux/openstrike`, or run `OpenStrike-linux/install.sh` to add
+OpenStrike to the current user's applications menu. The package is relocatable
+and includes the native executable, UI bundle, models, and the redistributable
+`open_arena` map.
+
 Inside OpenStrike:
 
 1. Both players select **Multiplayer**.

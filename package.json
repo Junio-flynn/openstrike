@@ -10,6 +10,7 @@
     "build:ui": "bun scripts/build-ui.ts --target psp",
     "build:desktop": "bun scripts/build-ui.ts --target desktop",
     "package:mac": "bash scripts/package-macos.sh",
+    "package:linux": "bash scripts/package-linux.sh",
     "build:vita": "bun scripts/vita.ts",
     "test:vita-package": "bun test test/openstrike-vita-artwork.test.ts",
     "test:e2e:vita": "bun scripts/e2e-vita.ts",
