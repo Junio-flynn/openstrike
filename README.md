@@ -163,6 +163,10 @@ The desktop build includes an in-game LAN lobby and a redistributable
 texture WAD are OpenStrike-owned, so the receiving player does not need to
 install Counter-Strike data before playing it.
 
+The shareable desktop packages include that one redistributable map. Additional
+GoldSrc BSP maps appear in the map picker when supplied through a source build's
+`--maps-dir` option; copyrighted Counter-Strike maps are not bundled.
+
 Build the shareable application on a Mac:
 
 ```sh

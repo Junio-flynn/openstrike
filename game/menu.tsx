@@ -94,10 +94,24 @@ export default function MainMenu(props: {
                 </View>
                 <View style={{ width: 1 * S, height: 150 * S, bgColor: "#263440" }} />
                 <View class="flex-col justify-center gap-1 flex-1">
-                  <View focusable onPress={() => setMapPage(true)} class={BUTTON} style={{ width: 238 * S, height: 34 * S }}>
-                    <Text class="text-sm font-bold" style={{ textColor: LIME, width: 34 * S }}>PLAY</Text>
-                    <Text class="text-sm font-bold tracking-wide" style={{ textColor: INK }}>CHOOSE MAP</Text>
-                  </View>
+                  <Show
+                    when={strike.desktopMapHost}
+                    fallback={
+                      <View focusable onPress={() => setMapPage(true)} class={BUTTON} style={{ width: 238 * S, height: 34 * S }}>
+                        <Text class="text-sm font-bold" style={{ textColor: LIME, width: 34 * S }}>PLAY</Text>
+                        <Text class="text-sm font-bold tracking-wide" style={{ textColor: INK }}>CHOOSE MAP</Text>
+                      </View>
+                    }
+                  >
+                    <View focusable onPress={props.onPlayDesktop} class={BUTTON} style={{ width: 238 * S, height: 34 * S }}>
+                      <Text class="text-sm font-bold" style={{ textColor: LIME, width: 34 * S }}>PLAY</Text>
+                      <Text class="text-sm font-bold tracking-wide" style={{ textColor: INK }}>RESUME MATCH</Text>
+                    </View>
+                    <View focusable onPress={() => setMapPage(true)} class={BUTTON} style={{ width: 238 * S, height: 27 * S }}>
+                      <Text class="text-xs font-bold" style={{ textColor: LIME }}>MAPS</Text>
+                      <Text class="text-sm font-bold tracking-wide" style={{ textColor: INK }}>CHOOSE MAP</Text>
+                    </View>
+                  </Show>
                   <View focusable onPress={props.onOpenSettings} class={BUTTON} style={{ width: 238 * S, height: 27 * S }}>
                     <Text class="text-xs font-bold" style={{ textColor: LIME }}>CFG</Text>
                     <Text class="text-sm font-bold" style={{ textColor: INK }}>SETTINGS</Text>
@@ -124,7 +138,9 @@ export default function MainMenu(props: {
           >
             <View class="flex-col h-full gap-2">
               <View class="flex-row items-center">
-                <Text class="text-xs font-bold tracking-wide" style={{ textColor: LIME }}>CHOOSE ONE OF THE THREE MAPS</Text>
+                <Text class="text-xs font-bold tracking-wide" style={{ textColor: LIME }}>
+                  {strike.maps.length === 1 ? "CHOOSE THE INSTALLED MAP" : `CHOOSE ONE OF ${strike.maps.length} MAPS`}
+                </Text>
                 <View class="flex-1" />
                 <Text class="text-xs tracking-wide" style={{ textColor: DIM }}>{loading() < 0 ? "CLICK TO PLAY" : "LOADING…"}</Text>
               </View>
