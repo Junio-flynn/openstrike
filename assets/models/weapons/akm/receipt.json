@@ -1,0 +1,23 @@
+{
+  "completedAt": "2026-10-14T04:09:33.811Z",
+  "destination": {
+    "assetId": "akm",
+    "version": "1.0.0"
+  },
+  "evidence": {
+    "blenderNormalizationPerformed": false,
+    "gpuImportTestPerformed": false,
+    "humanVisualReviewPerformed": false,
+    "modelBytesCopiedAndHashed": true,
+    "policyValidationCompleted": true,
+    "staticInspectionCompleted": true
+  },
+  "manifestSha256": "f94885088c1529d958d6cfb92298d0c96fb606df049b8070a6708033b99870d7",
+  "packageId": "pkg_a914a8750b616878a35888fb",
+  "schema": "game_dev.package_receipt.v1",
+  "source": {
+    "bytes": 145866032,
+    "fileName": "akm.glb",
+    "sha256": "bb97d948ccf74f57517afc98501edf67ce56294aab626f53e88ed269d21051fe"
+  }
+}

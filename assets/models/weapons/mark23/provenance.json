@@ -1,0 +1,10 @@
+{
+  "notes": "User accepted the unknown-license exception for this asset; exact model listing URL and license were not confirmed.",
+  "origin": "imported",
+  "schema": "game_dev.asset_provenance.v1",
+  "source": {
+    "bytes": 3079076,
+    "fileName": "mark23.glb",
+    "sha256": "af87a5dc212266ad268a01bcd393ec469974f82f076b84233dddee51959139ef"
+  }
+}

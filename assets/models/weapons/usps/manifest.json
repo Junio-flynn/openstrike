@@ -1,0 +1,45 @@
+{
+  "assetId": "usps",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/pistol-usp-s-weapon-model-cs2-5e0c452b1e2e4d7c9ea80638a94afaac",
+  "displayName": "USPS",
+  "files": [
+    {
+      "bytes": 46815112,
+      "kind": "model",
+      "path": "model.glb",
+      "sha256": "e9663f576759de85fdd16fa43123d0e964eee26b82846d62d2c78acc58b5b86f"
+    },
+    {
+      "bytes": 2000,
+      "kind": "metadata",
+      "path": "metadata.json",
+      "sha256": "fa9bc683852c1c73183effd78e127c67aa0e99901046edcbc34f14452b756c5b"
+    },
+    {
+      "bytes": 384,
+      "kind": "provenance",
+      "path": "provenance.json",
+      "sha256": "5224a34d24b16509708753d09849474c324ae72d37349527fd943572c9f1d672"
+    },
+    {
+      "bytes": 3661,
+      "kind": "validation",
+      "path": "validation.json",
+      "sha256": "2c3713614944dda070a7a031a424a610807143530773db6395ac49cc7f82fe91"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "model": "model.glb",
+  "packageId": "pkg_99fc998d1e543d0acd7bd9dd",
+  "provenance": {
+    "origin": "imported"
+  },
+  "schema": "game_dev.asset_package.v1",
+  "validation": {
+    "errorCount": 0,
+    "passed": true,
+    "warningCount": 0
+  },
+  "version": "1.0.0"
+}

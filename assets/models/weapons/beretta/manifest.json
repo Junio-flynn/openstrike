@@ -1,0 +1,45 @@
+{
+  "assetId": "beretta",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/beretta-pistol-fps-animation-0313ab1888994c14abeaf444d7af3217",
+  "displayName": "Beretta",
+  "files": [
+    {
+      "bytes": 60356236,
+      "kind": "model",
+      "path": "model.glb",
+      "sha256": "598e68831fcf9795dbc77ca9b517888e466d7fb8e3942ccc985869ef13d403c4"
+    },
+    {
+      "bytes": 2163,
+      "kind": "metadata",
+      "path": "metadata.json",
+      "sha256": "4fc8ca7d294e9e36783b2a6b2675c3f256c903043b2f2f26ae09f5bd223ab646"
+    },
+    {
+      "bytes": 385,
+      "kind": "provenance",
+      "path": "provenance.json",
+      "sha256": "88ab849ff4f551d9837b27b5a49d227783fba7667422b15e8621bd593fe2564b"
+    },
+    {
+      "bytes": 3579,
+      "kind": "validation",
+      "path": "validation.json",
+      "sha256": "96b497c8215ea0c246da4a8be2b231113f9ce96bcf32abead78abae6415d72bb"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "model": "model.glb",
+  "packageId": "pkg_c7ee2b856f63dcdec7b4c4e6",
+  "provenance": {
+    "origin": "imported"
+  },
+  "schema": "game_dev.asset_package.v1",
+  "validation": {
+    "errorCount": 0,
+    "passed": true,
+    "warningCount": 0
+  },
+  "version": "1.0.0"
+}

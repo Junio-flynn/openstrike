@@ -1,0 +1,45 @@
+{
+  "assetId": "makarov",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/makarov-pm-fps-animations-d02ebd58e3cf44acb7af73e3f156be28",
+  "displayName": "Makarov",
+  "files": [
+    {
+      "bytes": 47501428,
+      "kind": "model",
+      "path": "model.glb",
+      "sha256": "37103bed0a168903d3e7c16c07b7f1720e2a4fab02467a76ddac4fe9c2eb7ea9"
+    },
+    {
+      "bytes": 2724,
+      "kind": "metadata",
+      "path": "metadata.json",
+      "sha256": "3d31ee184cadbd3cadb231c14ff9193b22879f395b6a12bf1e4cf84a88bb0810"
+    },
+    {
+      "bytes": 416,
+      "kind": "provenance",
+      "path": "provenance.json",
+      "sha256": "05a967186dd2e49cb6511b1e08bc590c8c773c7b2c68665e7ab8b638ca9e75e4"
+    },
+    {
+      "bytes": 3677,
+      "kind": "validation",
+      "path": "validation.json",
+      "sha256": "6d458e462c056afbc3d88f6c2d3f14b368f012a037c63fd94d44fa4729044e54"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "model": "model.glb",
+  "packageId": "pkg_7d9e0979b2a9e5797e7f93d9",
+  "provenance": {
+    "origin": "imported"
+  },
+  "schema": "game_dev.asset_package.v1",
+  "validation": {
+    "errorCount": 0,
+    "passed": true,
+    "warningCount": 1
+  },
+  "version": "1.0.0"
+}

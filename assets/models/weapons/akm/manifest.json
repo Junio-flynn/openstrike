@@ -1,0 +1,45 @@
+{
+  "assetId": "akm",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/akm-fps-animation-a0e1e52051294bebb8a716df9e69434d",
+  "displayName": "AKM",
+  "files": [
+    {
+      "bytes": 145866032,
+      "kind": "model",
+      "path": "model.glb",
+      "sha256": "bb97d948ccf74f57517afc98501edf67ce56294aab626f53e88ed269d21051fe"
+    },
+    {
+      "bytes": 8011,
+      "kind": "metadata",
+      "path": "metadata.json",
+      "sha256": "bc4b30f0d7d79685b0af57d187ede9c69634a5465e46dd161d736f032313538a"
+    },
+    {
+      "bytes": 371,
+      "kind": "provenance",
+      "path": "provenance.json",
+      "sha256": "f05805e6152b77c7510b1bbf309645762ee5fc6495a347c41a2b71258294098e"
+    },
+    {
+      "bytes": 3879,
+      "kind": "validation",
+      "path": "validation.json",
+      "sha256": "fc6951c5207f7c113cb2a7fc28a845725ef2a854ce2875e75f9d20b118a5e934"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "model": "model.glb",
+  "packageId": "pkg_a914a8750b616878a35888fb",
+  "provenance": {
+    "origin": "imported"
+  },
+  "schema": "game_dev.asset_package.v1",
+  "validation": {
+    "errorCount": 0,
+    "passed": true,
+    "warningCount": 1
+  },
+  "version": "1.0.0"
+}

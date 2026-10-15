@@ -378,10 +378,14 @@ pub struct StrikeSim {
     pub bots: Vec<Bot>,
     pub bot_count: usize,
     pub weapon: Weapon,
-    /// Weapon slot currently held: 0 Scorpion, 1 AK-74M, 2 UZI, 3 sniper.
+    /// Weapon currently selected from the shared primary/secondary catalog.
     pub active_weapon: usize,
+    /// Starts false; the player chooses and equips one primary at spawn.
+    pub weapon_equipped: bool,
+    pub primary_weapon_slot: Option<usize>,
+    pub secondary_weapon_slot: Option<usize>,
     /// Inactive weapons retain their own magazine and reserve ammunition.
-    weapon_stash: [Option<Weapon>; 4],
+    weapon_stash: [Option<Weapon>; 16],
     pub effects: Effects,
     pub rng: Rng,
     pub phase: Phase,
@@ -424,8 +428,11 @@ impl StrikeSim {
             bot_count,
             weapon: Weapon::default(),
             active_weapon: 0,
+            weapon_equipped: false,
+            primary_weapon_slot: None,
+            secondary_weapon_slot: None,
             weapon_stash: [
-                None,
+                Some(Weapon::default()),
                 Some(Weapon::with_config(WeaponConfig {
                     mag_size: 30,
                     reserve: 90,
@@ -449,6 +456,102 @@ impl StrikeSim {
                     reload_time: 3.6,
                     damage_body: 50,
                     damage_head: 100,
+                })),
+                Some(Weapon::with_config(WeaponConfig {
+                    mag_size: 30,
+                    reserve: 90,
+                    fire_interval: 0.105,
+                    reload_time: 2.45,
+                    damage_body: 17,
+                    damage_head: 30,
+                })),
+                Some(Weapon::with_config(WeaponConfig {
+                    mag_size: 30,
+                    reserve: 90,
+                    fire_interval: 0.115,
+                    reload_time: 2.35,
+                    damage_body: 16,
+                    damage_head: 28,
+                })),
+                Some(Weapon::with_config(WeaponConfig {
+                    mag_size: 30,
+                    reserve: 90,
+                    fire_interval: 0.125,
+                    reload_time: 2.55,
+                    damage_body: 18,
+                    damage_head: 32,
+                })),
+                Some(Weapon::with_config(WeaponConfig {
+                    mag_size: 8,
+                    reserve: 32,
+                    fire_interval: 0.80,
+                    reload_time: 2.8,
+                    damage_body: 35,
+                    damage_head: 80,
+                })),
+                Some(Weapon::with_config(WeaponConfig {
+                    mag_size: 5,
+                    reserve: 25,
+                    fire_interval: 1.60,
+                    reload_time: 3.4,
+                    damage_body: 52,
+                    damage_head: 100,
+                })),
+                Some(Weapon::with_config(WeaponConfig {
+                    mag_size: 17,
+                    reserve: 68,
+                    fire_interval: 0.17,
+                    reload_time: 1.8,
+                    damage_body: 12,
+                    damage_head: 24,
+                })),
+                Some(Weapon::with_config(WeaponConfig {
+                    mag_size: 12,
+                    reserve: 48,
+                    fire_interval: 0.19,
+                    reload_time: 1.9,
+                    damage_body: 14,
+                    damage_head: 27,
+                })),
+                Some(Weapon::with_config(WeaponConfig {
+                    mag_size: 15,
+                    reserve: 60,
+                    fire_interval: 0.17,
+                    reload_time: 1.8,
+                    damage_body: 13,
+                    damage_head: 26,
+                })),
+                Some(Weapon::with_config(WeaponConfig {
+                    mag_size: 15,
+                    reserve: 60,
+                    fire_interval: 0.18,
+                    reload_time: 1.8,
+                    damage_body: 13,
+                    damage_head: 26,
+                })),
+                Some(Weapon::with_config(WeaponConfig {
+                    mag_size: 8,
+                    reserve: 32,
+                    fire_interval: 0.25,
+                    reload_time: 1.9,
+                    damage_body: 16,
+                    damage_head: 30,
+                })),
+                Some(Weapon::with_config(WeaponConfig {
+                    mag_size: 12,
+                    reserve: 48,
+                    fire_interval: 0.18,
+                    reload_time: 2.0,
+                    damage_body: 18,
+                    damage_head: 34,
+                })),
+                Some(Weapon::with_config(WeaponConfig {
+                    mag_size: 12,
+                    reserve: 48,
+                    fire_interval: 0.20,
+                    reload_time: 1.9,
+                    damage_body: 14,
+                    damage_head: 28,
                 })),
             ],
             effects: Effects::default(),
@@ -495,6 +598,14 @@ impl StrikeSim {
         let pitch = self.player.pitch;
         self.player = Player::spawn(pos, yaw);
         self.player.pitch = pitch * 0.25;
+        if self.weapon_equipped {
+            let active = self.active_weapon;
+            self.weapon_stash[active] =
+                Some(core::mem::replace(&mut self.weapon, Weapon::default()));
+            self.weapon_equipped = false;
+        }
+        self.primary_weapon_slot = None;
+        self.secondary_weapon_slot = None;
         self.weapon.reset();
         for weapon in self.weapon_stash.iter_mut().flatten() {
             weapon.reset();
@@ -508,9 +619,13 @@ impl StrikeSim {
     /// Switch weapons while preserving each slot's ammunition. Reloads and
     /// recoil presentation are cancelled, matching an immediate weapon swap.
     pub fn switch_weapon(&mut self, slot: usize) -> bool {
-        if slot >= self.weapon_stash.len() || slot == self.active_weapon {
+        if slot >= self.weapon_stash.len() || (self.weapon_equipped && slot == self.active_weapon) {
             return false;
         }
+        self.activate_weapon(slot)
+    }
+
+    fn activate_weapon(&mut self, slot: usize) -> bool {
         let Some(mut incoming) = self.weapon_stash[slot].take() else {
             return false;
         };
@@ -534,19 +649,79 @@ impl StrikeSim {
         incoming.prev_camera_kick_roll = 0.0;
         incoming.recoil = 0.0;
         incoming.prev_recoil = 0.0;
-        let outgoing = core::mem::replace(&mut self.weapon, incoming);
-        self.weapon_stash[self.active_weapon] = Some(outgoing);
+        if self.weapon_equipped {
+            let outgoing = core::mem::replace(&mut self.weapon, incoming);
+            self.weapon_stash[self.active_weapon] = Some(outgoing);
+        } else {
+            self.weapon = incoming;
+        }
         self.active_weapon = slot;
+        self.weapon_equipped = true;
         true
     }
 
-    pub const fn weapon_name(&self) -> &'static str {
-        match self.active_weapon {
-            1 => "AK-74M",
-            2 => "UZI",
-            3 => "BOLT-ACTION SNIPER",
-            _ => "SCORPION EVO 3",
+    /// Assign one weapon to the primary (0..9) or secondary (9..16) loadout
+    /// slot. The first chosen weapon becomes active; choosing the other class
+    /// leaves the current weapon active until the player presses 1 or 2.
+    pub fn choose_weapon(&mut self, slot: usize) -> bool {
+        if slot >= self.weapon_stash.len() {
+            return false;
         }
+        let primary = slot < 9;
+        let current_primary = self.active_weapon < 9;
+        if primary {
+            self.primary_weapon_slot = Some(slot);
+        } else {
+            self.secondary_weapon_slot = Some(slot);
+        }
+        if !self.weapon_equipped
+            || (primary && !current_primary)
+            || (primary && current_primary)
+            || (!primary && !current_primary)
+        {
+            if slot != self.active_weapon || !self.weapon_equipped {
+                return self.activate_weapon(slot);
+            }
+        }
+        true
+    }
+
+    /// Switch to the selected primary (0) or secondary (1) loadout slot.
+    pub fn switch_loadout_slot(&mut self, class: usize) -> bool {
+        let slot = match class {
+            0 => self.primary_weapon_slot,
+            1 => self.secondary_weapon_slot,
+            _ => None,
+        };
+        slot.is_some_and(|slot| slot != self.active_weapon && self.activate_weapon(slot))
+    }
+
+    pub fn weapon_name(&self) -> &'static str {
+        if !self.weapon_equipped {
+            return "NO WEAPON";
+        }
+        const NAMES: [&str; 16] = [
+            "SCORPION EVO 3",
+            "AK-74M",
+            "UZI",
+            "BOLT-ACTION SNIPER",
+            "AK-12",
+            "AKS-74U",
+            "AKM",
+            "REMINGTON 870",
+            "SNIPER",
+            "PISTOL 43",
+            "PL2000",
+            "BERETTA",
+            "FPS PISTOL",
+            "MAKAROV PM",
+            "MARK 23",
+            "USP-S",
+        ];
+        NAMES
+            .get(self.active_weapon)
+            .copied()
+            .unwrap_or("UNKNOWN WEAPON")
     }
 
     /// Apply one guest command (drained after each guest turn).
@@ -558,7 +733,7 @@ impl StrikeSim {
             Command::AddLoss => self.score.losses += 1,
             Command::SetBotCount(n) => self.bot_count = n.min(16),
             Command::SelectWeapon(slot) => {
-                self.switch_weapon(slot);
+                self.choose_weapon(slot);
             }
             Command::ConfigureWeapon(cfg) => {
                 self.weapon.cfg = cfg;
@@ -610,7 +785,7 @@ impl StrikeSim {
 
     /// Negative camera-FOV adjustment while aiming.
     pub fn aim_fov_offset_interpolated(&self, alpha: f32) -> f32 {
-        let reduction = if self.active_weapon == 3 {
+        let reduction = if matches!(self.active_weapon, 3 | 8) {
             SNIPER_AIM_FOV_REDUCTION
         } else {
             AIM_FOV_REDUCTION
@@ -619,7 +794,7 @@ impl StrikeSim {
     }
 
     fn aim_move_speed_scale(&self) -> f32 {
-        let aimed_scale = if self.active_weapon == 3 {
+        let aimed_scale = if matches!(self.active_weapon, 3 | 8) {
             SNIPER_AIM_MOVE_SPEED_SCALE
         } else {
             AIM_MOVE_SPEED_SCALE
@@ -662,11 +837,13 @@ impl StrikeSim {
         self.fired_this_tick = false;
         let live = self.phase == Phase::Live;
         if live && self.player.alive && !movement_frozen {
-            if input.reload {
+            if self.weapon_equipped && input.reload {
                 self.weapon.trigger_reload();
             }
             let recoil_scale = 1.0 - (1.0 - AIM_RECOIL_SCALE) * self.aim_fraction;
-            let trigger = input.fire && (self.active_weapon != 3 || fire_pressed);
+            let trigger = self.weapon_equipped
+                && input.fire
+                && (!matches!(self.active_weapon, 3 | 8) || fire_pressed);
             if trigger && self.weapon.fire_with_kick(recoil_scale) {
                 self.fire_shot(col);
             }
@@ -1106,7 +1283,7 @@ impl StrikeSim {
         // scope removes that extra cone smoothly, then settles more tightly
         // than the other weapons. This prevents both no-scope accuracy and a
         // one-frame right-click accuracy exploit.
-        if self.active_weapon == 3 {
+        if matches!(self.active_weapon, 3 | 8) {
             let hip_weight = 1.0 - self.aim_fraction;
             spread += SNIPER_HIP_SPREAD * hip_weight * hip_weight;
             spread *= 1.0 - (1.0 - SNIPER_AIM_SPREAD_SCALE) * self.aim_fraction;
@@ -1195,7 +1372,7 @@ impl StrikeSim {
             .saturating_sub(1)
             .min(RECOIL_PATTERN.len() as u32 - 1) as usize;
         let (pitch_kick, yaw_kick) = RECOIL_PATTERN[pattern_index];
-        let sniper_scoped = self.active_weapon == 3 && self.aim_fraction >= 0.92;
+        let sniper_scoped = matches!(self.active_weapon, 3 | 8) && self.aim_fraction >= 0.92;
         let recoil_scale = 1.0 - (1.0 - AIM_RECOIL_SCALE) * self.aim_fraction;
         self.weapon.add_aim_punch(
             pitch_kick * DEG * recoil_scale,

@@ -1,0 +1,23 @@
+{
+  "completedAt": "2026-10-14T04:09:34.623Z",
+  "destination": {
+    "assetId": "pl2000",
+    "version": "1.0.0"
+  },
+  "evidence": {
+    "blenderNormalizationPerformed": false,
+    "gpuImportTestPerformed": false,
+    "humanVisualReviewPerformed": false,
+    "modelBytesCopiedAndHashed": true,
+    "policyValidationCompleted": true,
+    "staticInspectionCompleted": true
+  },
+  "manifestSha256": "4572bd1eb46e6cdf3fc2753785b7f02d6bf367d76935d4edc99e433c2fba78cf",
+  "packageId": "pkg_ea7d19a5ce60a9dd9b1b36b9",
+  "schema": "game_dev.package_receipt.v1",
+  "source": {
+    "bytes": 134145400,
+    "fileName": "pl2000.glb",
+    "sha256": "c356483394fa7942274bc56b982db850e3532bc1fe0899e3d48f8a3edd683544"
+  }
+}

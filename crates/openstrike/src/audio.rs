@@ -121,7 +121,12 @@ impl Clips {
     fn get(&self, sound: Sound) -> (&[f32], f32) {
         match sound {
             Sound::Gun(slot) => {
-                let slot = slot.min(3);
+                let slot = match slot {
+                    1 | 4..=6 => 1,
+                    2 => 2,
+                    3 | 8 => 3,
+                    _ => 0,
+                };
                 let volume = match slot {
                     2 => 0.40,
                     3 => 0.78,
@@ -133,7 +138,15 @@ impl Clips {
             Sound::WallRun => (&self.footsteps[1], 0.48),
             Sound::AimIn => (&self.aim_in, 0.42),
             Sound::AimOut => (&self.aim_out, 0.36),
-            Sound::Reload(slot) => (&self.reloads[slot.min(3)], 0.46),
+            Sound::Reload(slot) => {
+                let slot = match slot {
+                    1 | 4..=6 => 1,
+                    2 => 2,
+                    3 | 8 => 3,
+                    _ => 0,
+                };
+                (&self.reloads[slot], 0.46)
+            }
             Sound::Land => (&self.land, 0.58),
             Sound::Impact => (&self.impact, 0.42),
             Sound::Hit => (&self.hit, 0.36),

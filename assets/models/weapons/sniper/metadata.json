@@ -1,0 +1,91 @@
+{
+  "assetId": "sniper",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/sniper-fps-animation-f5174e499bff4d96b528c891b08c2015",
+  "displayName": "Sniper",
+  "inspection": {
+    "animationCount": 2,
+    "boundingBox": {
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "sizeMeters": [
+        2,
+        2,
+        2
+      ]
+    },
+    "boundingBoxEmpty": false,
+    "fileBytes": 62884748,
+    "filePath": "model.glb",
+    "generator": "glTF-Transform v4.5.1",
+    "hasNormals": true,
+    "hasSkin": true,
+    "hasTangents": true,
+    "hasUVs": true,
+    "materialCount": 3,
+    "meshCount": 4,
+    "pbr": {
+      "hasBaseColorTexture": true,
+      "hasEmissiveTexture": false,
+      "hasMetallicRoughnessTexture": true,
+      "hasNormalTexture": true,
+      "hasOcclusionTexture": false
+    },
+    "primitiveCount": 4,
+    "sceneGraphFallback": false,
+    "textureCount": 5,
+    "textureResolutions": [
+      {
+        "bytes": 26776187,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "TEXTURA_NORMAL",
+        "width": 4096
+      },
+      {
+        "bytes": 19945538,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "TEXTURA",
+        "width": 4096
+      },
+      {
+        "bytes": 4378424,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "sniperNormal",
+        "width": 2048
+      },
+      {
+        "bytes": 5021672,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "sniperColor",
+        "width": 2048
+      },
+      {
+        "bytes": 4092687,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "sniperMetallic.png-sniperRoughness.png",
+        "width": 2048
+      }
+    ],
+    "triangleCount": 21852,
+    "undrawnMeshCount": 0,
+    "undrawnPrimitiveCount": 0,
+    "undrawnTriangleCount": 0,
+    "vertexCount": 17111,
+    "warnings": []
+  },
+  "license": "CC-BY-4.0",
+  "schema": "game_dev.asset_metadata.v1"
+}

@@ -1,0 +1,11 @@
+{
+  "notes": "Sketchfab CC Attribution listing; source also indicates NoAI terms.",
+  "origin": "imported",
+  "schema": "game_dev.asset_provenance.v1",
+  "source": {
+    "bytes": 40859196,
+    "fileName": "remington.glb",
+    "sha256": "d617c54bb275a90674b1d3ee2e6d5d45b57139bf1e4d5b6f00b0ea21c6dd0670"
+  },
+  "sourceUri": "https://sketchfab.com/3d-models/fps-arms-remington-shotgun-e68ef617fe8a48cca8610d016ffd5881"
+}

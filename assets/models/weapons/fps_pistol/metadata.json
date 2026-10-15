@@ -1,0 +1,91 @@
+{
+  "assetId": "fps_pistol",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/fps-pistol-animations-0d7a343dcb6f401197a73c91aee93f6d",
+  "displayName": "FPS-Pistol",
+  "inspection": {
+    "animationCount": 10,
+    "boundingBox": {
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "sizeMeters": [
+        2,
+        2,
+        2
+      ]
+    },
+    "boundingBoxEmpty": false,
+    "fileBytes": 141230788,
+    "filePath": "model.glb",
+    "generator": "glTF-Transform v4.5.1",
+    "hasNormals": true,
+    "hasSkin": true,
+    "hasTangents": true,
+    "hasUVs": true,
+    "materialCount": 3,
+    "meshCount": 5,
+    "pbr": {
+      "hasBaseColorTexture": true,
+      "hasEmissiveTexture": false,
+      "hasMetallicRoughnessTexture": true,
+      "hasNormalTexture": true,
+      "hasOcclusionTexture": false
+    },
+    "primitiveCount": 5,
+    "sceneGraphFallback": false,
+    "textureCount": 5,
+    "textureResolutions": [
+      {
+        "bytes": 26266672,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "armNormal",
+        "width": 4096
+      },
+      {
+        "bytes": 25667143,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "armColor",
+        "width": 4096
+      },
+      {
+        "bytes": 14239752,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "armRoughness",
+        "width": 4096
+      },
+      {
+        "bytes": 69136295,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "for_texturing_None.001_Normal",
+        "width": 4096
+      },
+      {
+        "bytes": 3469693,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "for_texturing_None.001_Diffuse",
+        "width": 4096
+      }
+    ],
+    "triangleCount": 32682,
+    "undrawnMeshCount": 0,
+    "undrawnPrimitiveCount": 0,
+    "undrawnTriangleCount": 0,
+    "vertexCount": 24422,
+    "warnings": []
+  },
+  "license": "CC-BY-4.0",
+  "schema": "game_dev.asset_metadata.v1"
+}

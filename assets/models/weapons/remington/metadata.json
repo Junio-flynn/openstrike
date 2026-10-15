@@ -1,0 +1,121 @@
+{
+  "assetId": "remington",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/fps-arms-remington-shotgun-e68ef617fe8a48cca8610d016ffd5881",
+  "displayName": "Remington",
+  "inspection": {
+    "animationCount": 4,
+    "boundingBox": {
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "sizeMeters": [
+        2,
+        2,
+        2
+      ]
+    },
+    "boundingBoxEmpty": false,
+    "fileBytes": 40859196,
+    "filePath": "model.glb",
+    "generator": "glTF-Transform v4.5.1",
+    "hasNormals": true,
+    "hasSkin": true,
+    "hasTangents": true,
+    "hasUVs": true,
+    "materialCount": 4,
+    "meshCount": 4,
+    "pbr": {
+      "hasBaseColorTexture": true,
+      "hasEmissiveTexture": false,
+      "hasMetallicRoughnessTexture": true,
+      "hasNormalTexture": true,
+      "hasOcclusionTexture": false
+    },
+    "primitiveCount": 4,
+    "sceneGraphFallback": false,
+    "textureCount": 9,
+    "textureResolutions": [
+      {
+        "bytes": 354524,
+        "height": 512,
+        "mimeType": "image/png",
+        "name": "12ge_Normal_DirectX",
+        "width": 512
+      },
+      {
+        "bytes": 310801,
+        "height": 512,
+        "mimeType": "image/png",
+        "name": "12ge_Base_Color",
+        "width": 512
+      },
+      {
+        "bytes": 290307,
+        "height": 512,
+        "mimeType": "image/png",
+        "name": "12ge_Metallic.png-12ge_Roughness.png",
+        "width": 512
+      },
+      {
+        "bytes": 2796801,
+        "height": 4096,
+        "mimeType": "image/jpeg",
+        "name": "remington_Normal_DirectX",
+        "width": 4096
+      },
+      {
+        "bytes": 4037626,
+        "height": 4096,
+        "mimeType": "image/jpeg",
+        "name": "remington_Base_Color",
+        "width": 4096
+      },
+      {
+        "bytes": 18042930,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "remington_Metallic-remington_Roughness",
+        "width": 4096
+      },
+      {
+        "bytes": 7326485,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "armCNormal",
+        "width": 2048
+      },
+      {
+        "bytes": 3884664,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "armCcolor",
+        "width": 2048
+      },
+      {
+        "bytes": 2789123,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "armcRoughness",
+        "width": 2048
+      }
+    ],
+    "triangleCount": 9163,
+    "undrawnMeshCount": 0,
+    "undrawnPrimitiveCount": 0,
+    "undrawnTriangleCount": 0,
+    "vertexCount": 7045,
+    "warnings": [
+      "texture is below 1024px on an axis and will blur at close range: 12ge_Normal_DirectX (512x512), 12ge_Base_Color (512x512), 12ge_Metallic.png-12ge_Roughness.png (512x512)"
+    ]
+  },
+  "license": "CC-BY-4.0",
+  "schema": "game_dev.asset_metadata.v1"
+}

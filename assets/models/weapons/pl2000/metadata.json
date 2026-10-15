@@ -1,0 +1,130 @@
+{
+  "assetId": "pl2000",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/animatedpistol-d52bd01ee951440294a73c40c830a541",
+  "displayName": "PL2000",
+  "inspection": {
+    "animationCount": 8,
+    "boundingBox": {
+      "max": [
+        0.5050153732299805,
+        1.657009482383728,
+        0.4591215252876282
+      ],
+      "min": [
+        -0.5050153732299805,
+        -0.054684847593307495,
+        -0.14832806587219238
+      ],
+      "sizeMeters": [
+        1.010030746459961,
+        1.7116943299770355,
+        0.6074495911598206
+      ]
+    },
+    "boundingBoxEmpty": false,
+    "fileBytes": 134145400,
+    "filePath": "model.glb",
+    "generator": "glTF-Transform v4.5.1",
+    "hasNormals": true,
+    "hasSkin": true,
+    "hasTangents": true,
+    "hasUVs": true,
+    "materialCount": 4,
+    "meshCount": 9,
+    "pbr": {
+      "hasBaseColorTexture": true,
+      "hasEmissiveTexture": false,
+      "hasMetallicRoughnessTexture": true,
+      "hasNormalTexture": true,
+      "hasOcclusionTexture": false
+    },
+    "primitiveCount": 9,
+    "sceneGraphFallback": false,
+    "textureCount": 10,
+    "textureResolutions": [
+      {
+        "bytes": 8189489,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "pl2000_main2_n",
+        "width": 4096
+      },
+      {
+        "bytes": 7631052,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "pl2000_main2_d",
+        "width": 4096
+      },
+      {
+        "bytes": 5412180,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "soldierhand_n",
+        "width": 2048
+      },
+      {
+        "bytes": 3627572,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "soldierhand_d",
+        "width": 2048
+      },
+      {
+        "bytes": 250,
+        "height": 1,
+        "mimeType": "image/png",
+        "name": "Image",
+        "width": 1
+      },
+      {
+        "bytes": 11506209,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "pl2000_main3_n",
+        "width": 4096
+      },
+      {
+        "bytes": 9825155,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "pl2000_main3_d",
+        "width": 4096
+      },
+      {
+        "bytes": 69025698,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "for_texturing_None.001_Normal",
+        "width": 4096
+      },
+      {
+        "bytes": 4923673,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "for_texturing_None.001_Diffuse",
+        "width": 4096
+      },
+      {
+        "bytes": 11190324,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "for_texturing_None.001_Glossiness",
+        "width": 4096
+      }
+    ],
+    "triangleCount": 39170,
+    "undrawnMeshCount": 0,
+    "undrawnPrimitiveCount": 0,
+    "undrawnTriangleCount": 0,
+    "vertexCount": 27335,
+    "warnings": [
+      "glTF reader: Missing optional extension, \"KHR_materials_specular\".",
+      "glTF reader: Missing optional extension, \"KHR_materials_ior\".",
+      "texture is below 1024px on an axis and will blur at close range: Image (1x1)"
+    ]
+  },
+  "license": "CC-BY-4.0",
+  "schema": "game_dev.asset_metadata.v1"
+}

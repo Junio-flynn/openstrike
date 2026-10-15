@@ -14,8 +14,11 @@ export interface StrikeState {
   ammo: number;
   reserve: number;
   magSize: number;
+  weaponEquipped: boolean;
   weaponName: string;
   weaponSlot: number;
+  primaryWeaponSlot: number | null;
+  secondaryWeaponSlot: number | null;
   aimFraction: number;
   reloading: boolean;
   reloadFrac: number;
@@ -68,6 +71,7 @@ interface NativeStrike {
   loadMap?(index: number): void;
   toMenu?(): void;
   setPaused?(paused: boolean): void;
+  setMouseCursorUnlocked?(unlocked: boolean): void;
   setMouseSensitivity?(scale: number): void;
   setScopeMultiplier?(scale: number): void;
   setControlScheme?(scheme: number): void;
@@ -105,11 +109,14 @@ let current: StrikeState = {
   phase: "starting",
   hp: 100,
   alive: true,
-  ammo: 30,
-  reserve: 90,
+  ammo: 0,
+  reserve: 0,
   magSize: 30,
-  weaponName: "SCORPION EVO 3",
+  weaponEquipped: false,
+  weaponName: "NO WEAPON",
   weaponSlot: 0,
+  primaryWeaponSlot: null,
+  secondaryWeaponSlot: null,
   aimFraction: 0,
   reloading: false,
   reloadFrac: 0,
@@ -184,6 +191,7 @@ export const strike = {
   },
   /** Pause/resume simulation on hosts with an in-process menu (desktop). */
   setPaused: (paused: boolean) => native.setPaused?.(paused),
+  setMouseCursorUnlocked: (unlocked: boolean) => native.setMouseCursorUnlocked?.(unlocked),
   setMouseSensitivity: (scale: number) => native.setMouseSensitivity?.(scale),
   setScopeMultiplier: (scale: number) => native.setScopeMultiplier?.(scale),
   setControlScheme: (scheme: number) => native.setControlScheme?.(scheme),

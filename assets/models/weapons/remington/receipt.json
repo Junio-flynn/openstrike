@@ -1,0 +1,23 @@
+{
+  "completedAt": "2026-10-14T04:09:35.966Z",
+  "destination": {
+    "assetId": "remington",
+    "version": "1.0.0"
+  },
+  "evidence": {
+    "blenderNormalizationPerformed": false,
+    "gpuImportTestPerformed": false,
+    "humanVisualReviewPerformed": false,
+    "modelBytesCopiedAndHashed": true,
+    "policyValidationCompleted": true,
+    "staticInspectionCompleted": true
+  },
+  "manifestSha256": "35ad15effe3877d28e81f97ca1832a9b752042d424d271917f6db81b282d0fae",
+  "packageId": "pkg_75edf525eab6130ccd4ec946",
+  "schema": "game_dev.package_receipt.v1",
+  "source": {
+    "bytes": 40859196,
+    "fileName": "remington.glb",
+    "sha256": "d617c54bb275a90674b1d3ee2e6d5d45b57139bf1e4d5b6f00b0ea21c6dd0670"
+  }
+}

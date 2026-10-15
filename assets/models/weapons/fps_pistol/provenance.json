@@ -1,0 +1,11 @@
+{
+  "notes": "Sketchfab CC Attribution listing.",
+  "origin": "imported",
+  "schema": "game_dev.asset_provenance.v1",
+  "source": {
+    "bytes": 141230788,
+    "fileName": "fps-pistol.glb",
+    "sha256": "f659915081370153932c4d696552e6fa212fe68661f1d5174509af22558e7c90"
+  },
+  "sourceUri": "https://sketchfab.com/3d-models/fps-pistol-animations-0d7a343dcb6f401197a73c91aee93f6d"
+}

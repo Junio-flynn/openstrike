@@ -1,0 +1,114 @@
+{
+  "assetId": "makarov",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/makarov-pm-fps-animations-d02ebd58e3cf44acb7af73e3f156be28",
+  "displayName": "Makarov",
+  "inspection": {
+    "animationCount": 6,
+    "boundingBox": {
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "sizeMeters": [
+        2,
+        2,
+        2
+      ]
+    },
+    "boundingBoxEmpty": false,
+    "fileBytes": 47501428,
+    "filePath": "model.glb",
+    "generator": "glTF-Transform v4.5.1",
+    "hasNormals": true,
+    "hasSkin": true,
+    "hasTangents": true,
+    "hasUVs": true,
+    "materialCount": 4,
+    "meshCount": 3,
+    "pbr": {
+      "hasBaseColorTexture": true,
+      "hasEmissiveTexture": true,
+      "hasMetallicRoughnessTexture": true,
+      "hasNormalTexture": true,
+      "hasOcclusionTexture": false
+    },
+    "primitiveCount": 4,
+    "sceneGraphFallback": false,
+    "textureCount": 8,
+    "textureResolutions": [
+      {
+        "bytes": 15098284,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "Makarov_main_Normal_OpenGL",
+        "width": 4096
+      },
+      {
+        "bytes": 11121250,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "Makarov_main_Base_Color",
+        "width": 4096
+      },
+      {
+        "bytes": 18869,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "makarov_attachments_Emissive",
+        "width": 2048
+      },
+      {
+        "bytes": 5552312,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "makarov_attachments_Normal_OpenGL",
+        "width": 2048
+      },
+      {
+        "bytes": 250,
+        "height": 1,
+        "mimeType": "image/png",
+        "name": "Image",
+        "width": 1
+      },
+      {
+        "bytes": 7326485,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "armCNormal",
+        "width": 2048
+      },
+      {
+        "bytes": 3884664,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "armCcolor",
+        "width": 2048
+      },
+      {
+        "bytes": 2789123,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "armcRoughness",
+        "width": 2048
+      }
+    ],
+    "triangleCount": 18170,
+    "undrawnMeshCount": 0,
+    "undrawnPrimitiveCount": 0,
+    "undrawnTriangleCount": 0,
+    "vertexCount": 14025,
+    "warnings": [
+      "texture is below 1024px on an axis and will blur at close range: Image (1x1)"
+    ]
+  },
+  "license": "CC-BY-4.0",
+  "schema": "game_dev.asset_metadata.v1"
+}

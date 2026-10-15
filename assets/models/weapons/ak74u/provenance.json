@@ -1,0 +1,11 @@
+{
+  "notes": "Sketchfab CC Attribution listing.",
+  "origin": "imported",
+  "schema": "game_dev.asset_provenance.v1",
+  "source": {
+    "bytes": 119754740,
+    "fileName": "ak74u.glb",
+    "sha256": "1f041a07f95164b84988ffea22715bf73252441c68a4a5604736c0ea16fdcc96"
+  },
+  "sourceUri": "https://sketchfab.com/3d-models/animated-aks-74u-34220aaa62e44b34b7d5ac30701f2b5f"
+}

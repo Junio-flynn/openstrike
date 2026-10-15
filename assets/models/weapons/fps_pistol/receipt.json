@@ -1,0 +1,23 @@
+{
+  "completedAt": "2026-10-14T04:09:36.679Z",
+  "destination": {
+    "assetId": "fps_pistol",
+    "version": "1.0.0"
+  },
+  "evidence": {
+    "blenderNormalizationPerformed": false,
+    "gpuImportTestPerformed": false,
+    "humanVisualReviewPerformed": false,
+    "modelBytesCopiedAndHashed": true,
+    "policyValidationCompleted": true,
+    "staticInspectionCompleted": true
+  },
+  "manifestSha256": "ec53bcb2d8139dcd9b68cfcda82a4b36441e9773f99eae2dc4d618012be0a1bf",
+  "packageId": "pkg_83e7a1b390c8d15c6c91a644",
+  "schema": "game_dev.package_receipt.v1",
+  "source": {
+    "bytes": 141230788,
+    "fileName": "fps-pistol.glb",
+    "sha256": "f659915081370153932c4d696552e6fa212fe68661f1d5174509af22558e7c90"
+  }
+}

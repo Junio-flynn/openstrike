@@ -1,0 +1,23 @@
+{
+  "completedAt": "2026-10-14T04:09:37.487Z",
+  "destination": {
+    "assetId": "mark23",
+    "version": "1.0.0"
+  },
+  "evidence": {
+    "blenderNormalizationPerformed": false,
+    "gpuImportTestPerformed": false,
+    "humanVisualReviewPerformed": false,
+    "modelBytesCopiedAndHashed": true,
+    "policyValidationCompleted": true,
+    "staticInspectionCompleted": true
+  },
+  "manifestSha256": "96ff229c005c04d6d1b24680f9b4978326719b357b9d53fd9eda7c46854f4a06",
+  "packageId": "pkg_6e608dc1a6a795df766ca015",
+  "schema": "game_dev.package_receipt.v1",
+  "source": {
+    "bytes": 3079076,
+    "fileName": "mark23.glb",
+    "sha256": "af87a5dc212266ad268a01bcd393ec469974f82f076b84233dddee51959139ef"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "assetId": "mark23",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive.",
+  "displayName": "Mark23",
+  "files": [
+    {
+      "bytes": 3079076,
+      "kind": "model",
+      "path": "model.glb",
+      "sha256": "af87a5dc212266ad268a01bcd393ec469974f82f076b84233dddee51959139ef"
+    },
+    {
+      "bytes": 1827,
+      "kind": "metadata",
+      "path": "metadata.json",
+      "sha256": "26096a6454972f5f6f5038f2ecf48aea1b1b57a908ab055b29d807070bda379d"
+    },
+    {
+      "bytes": 353,
+      "kind": "provenance",
+      "path": "provenance.json",
+      "sha256": "e31da2385a1b4966913ed1db1130a687ddedf3ffbe2c2add39d94f4cc62869d6"
+    },
+    {
+      "bytes": 3298,
+      "kind": "validation",
+      "path": "validation.json",
+      "sha256": "eae011f762d6c5ac792db74885998886421952986df8a6bdfb08e01e2df15c17"
+    }
+  ],
+  "license": "LicenseRef-Unknown",
+  "model": "model.glb",
+  "packageId": "pkg_6e608dc1a6a795df766ca015",
+  "provenance": {
+    "origin": "imported"
+  },
+  "schema": "game_dev.asset_package.v1",
+  "validation": {
+    "errorCount": 0,
+    "passed": true,
+    "warningCount": 1
+  },
+  "version": "1.0.0"
+}

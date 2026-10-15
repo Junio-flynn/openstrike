@@ -18,10 +18,10 @@
 // Class strings are ternaries of FULL literals (the Tailwind subset bakes
 // at build time); `S` picks the compact PSP set or the scaled desktop set.
 
-import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { Image, Text, View } from "@pocketjs/framework/components";
 import * as hot from "@pocketjs/framework/hot";
-import { pushFocusScope } from "@pocketjs/framework/input";
+import { enableCursor, pushFocusScope } from "@pocketjs/framework/input";
 import { onButtonPress, onFrame } from "@pocketjs/framework/lifecycle";
 import { strike, type StrikeState } from "./sdk.ts";
 import { ROUND_FREEZE, phaseAge } from "./rules.ts";
@@ -57,6 +57,17 @@ const S = Math.max(1, Math.round(vp.h / 272));
 const FEED_ROWS = 3;
 const BAR_W = 90;
 const AMMO_BAR_W = 64;
+const PRIMARY_WEAPONS = [
+  { name: "SCORPION EVO 3", slot: 0 }, { name: "AK-74M", slot: 1 }, { name: "UZI", slot: 2 },
+  { name: "BOLT-ACTION SNIPER", slot: 3 }, { name: "AK-12", slot: 4 }, { name: "AKS-74U", slot: 5 },
+  { name: "AKM", slot: 6 }, { name: "REMINGTON 870", slot: 7 }, { name: "SNIPER", slot: 8 },
+] as const;
+const SECONDARY_WEAPONS = [
+  { name: "PISTOL 43", slot: 9 }, { name: "PL2000", slot: 10 }, { name: "BERETTA", slot: 11 },
+  { name: "FPS PISTOL", slot: 12 }, { name: "MAKAROV PM", slot: 13 }, { name: "MARK 23", slot: 14 },
+  { name: "USP-S", slot: 15 },
+] as const;
+const WEAPON_NAMES = [...PRIMARY_WEAPONS, ...SECONDARY_WEAPONS].sort((a, b) => a.slot - b.slot).map((weapon) => weapon.name);
 
 type Ref = NonNullable<Parameters<typeof hot.text>[0]>;
 
@@ -66,6 +77,11 @@ export default function Hud() {
   const [phase, setPhase] = createSignal(s0.phase);
   const [reserve, setReserve] = createSignal(s0.reserve);
   const [weaponName, setWeaponName] = createSignal(s0.weaponName ?? "SCORPION EVO 3");
+  const [weaponSlot, setWeaponSlot] = createSignal(s0.weaponSlot);
+  const [weaponEquipped, setWeaponEquipped] = createSignal(s0.weaponEquipped);
+  const [primaryWeaponSlot, setPrimaryWeaponSlot] = createSignal<number | null>(s0.primaryWeaponSlot);
+  const [secondaryWeaponSlot, setSecondaryWeaponSlot] = createSignal<number | null>(s0.secondaryWeaponSlot);
+  const [loadoutChosen, setLoadoutChosen] = createSignal(false);
   const [countdown, setCountdown] = createSignal(0);
   const [multiplayer, setMultiplayer] = createSignal(s0.multiplayer);
   const [matchLive, setMatchLive] = createSignal(s0.matchLive);
@@ -74,7 +90,24 @@ export default function Hud() {
   // SELECT opens/closes the quit dialog (BTN.SELECT = 0x0001). The mount is
   // structural but user-initiated — never on the combat hot path.
   const [dialog, setDialog] = createSignal(false);
+  let pendingPrimarySlot: number | null = null;
+  let pendingSecondarySlot: number | null = null;
+  let disposeLoadoutCursor: (() => void) | undefined;
+  createEffect(() => {
+    strike.setMouseCursorUnlocked(!loadoutChosen());
+    if (!loadoutChosen()) {
+      disposeLoadoutCursor ??= enableCursor({ speed: 520, dpadSpeed: 300, size: [1, 1] });
+    } else if (disposeLoadoutCursor) {
+      disposeLoadoutCursor();
+      disposeLoadoutCursor = undefined;
+    }
+  });
+  onCleanup(() => disposeLoadoutCursor?.());
   onButtonPress(0x0001, () => {
+    if (!loadoutChosen()) {
+      strike.toMenu();
+      return;
+    }
     // Desktop Escape returns directly to its in-process menu. Handhelds keep
     // the confirmation dialog because SELECT is easier to hit accidentally.
     if (strike.maps.length === 0) strike.toMenu();
@@ -124,6 +157,11 @@ export default function Hud() {
   strike.on("roundReset", () => {
     for (let i = 0; i < FEED_ROWS; i++) feedTtl[i] = 0;
     flash = 0;
+    pendingPrimarySlot = null;
+    pendingSecondarySlot = null;
+    setPrimaryWeaponSlot(null);
+    setSecondaryWeaponSlot(null);
+    setLoadoutChosen(false);
   });
 
   /** Left-anchored fill: scaleX shrinks about the center, so pull the bar
@@ -196,7 +234,28 @@ export default function Hud() {
       lWeaponName = currentWeaponName;
       setWeaponName(currentWeaponName);
     }
-
+    if (s.weaponSlot !== weaponSlot()) setWeaponSlot(s.weaponSlot);
+    if (s.weaponEquipped !== weaponEquipped()) setWeaponEquipped(s.weaponEquipped);
+    // Drive loadout completion from acknowledged simulation state. The
+    // second click used to hide the picker before its command had landed,
+    // leaving an occasional spawn stuck in the frozen starting phase.
+    if (s.phase === "starting" && s.primaryWeaponSlot == null && s.secondaryWeaponSlot == null) {
+      pendingPrimarySlot = null;
+      pendingSecondarySlot = null;
+      if (primaryWeaponSlot() != null) setPrimaryWeaponSlot(null);
+      if (secondaryWeaponSlot() != null) setSecondaryWeaponSlot(null);
+      if (loadoutChosen()) setLoadoutChosen(false);
+    }
+    if (s.phase === "live" && s.primaryWeaponSlot != null && !loadoutChosen()) {
+      setLoadoutChosen(true);
+    }
+    if (pendingPrimarySlot !== null && s.primaryWeaponSlot === pendingPrimarySlot) pendingPrimarySlot = null;
+    if (pendingSecondarySlot !== null && s.secondaryWeaponSlot === pendingSecondarySlot) {
+      pendingSecondarySlot = null;
+      setLoadoutChosen(true);
+    }
+    if (pendingPrimarySlot === null && s.primaryWeaponSlot !== primaryWeaponSlot()) setPrimaryWeaponSlot(s.primaryWeaponSlot);
+    if (pendingSecondarySlot === null && s.secondaryWeaponSlot !== secondaryWeaponSlot()) setSecondaryWeaponSlot(s.secondaryWeaponSlot);
     // Hot values: imperative, change-guarded, zero-layout.
     const hp = s.hp > 0 ? s.hp : 0;
     if (hp !== lHp) {
@@ -240,7 +299,7 @@ export default function Hud() {
       lAlive = s.alive;
       hot.prop(vignette, "opacity", s.alive ? 0 : 0.4);
     }
-    const scope = s.alive && s.weaponSlot === 3
+    const scope = s.alive && s.weaponEquipped && (s.weaponSlot === 3 || s.weaponSlot === 8)
       ? Math.max(0, Math.min(1, (s.aimFraction - 0.35) / 0.57))
       : 0;
     if (scope !== lScope) {
@@ -278,6 +337,19 @@ export default function Hud() {
     multiplayer()
       ? `ROUND ${matchRound()} / RESETTING`
       : "GO IN " + countdown() + " ";
+  const loadoutOn = () => !loadoutChosen();
+  const chooseWeapon = (slot: number) => {
+    if (slot < 9) {
+      strike.selectWeapon(slot);
+      pendingPrimarySlot = slot;
+      setPrimaryWeaponSlot(slot);
+      return;
+    }
+    if (primaryWeaponSlot() == null) return;
+    strike.selectWeapon(slot);
+    pendingSecondarySlot = slot;
+    setSecondaryWeaponSlot(slot);
+  };
 
   return (
     <View class="w-full h-full">
@@ -399,152 +471,108 @@ export default function Hud() {
 
         {/* ---- bottom row ---- */}
         <View class="flex-row justify-between items-end">
-          {/* Health: fixed number cell + paint-only bar fill */}
-          <View class="flex-col gap-1">
+          <View class="flex-col items-start gap-1">
+            <View class="flex-row items-end gap-1">
+              <Text class="text-xs font-bold tracking-wide" style={{ textColor: LIME }}>SPEED:</Text>
+              <Text ref={(el) => (speedText = el)} class="text-xs font-bold" style={{ textColor: INK, width: 34 * S, height: 12 * S }}>0</Text>
+            </View>
             <View
-              class={
-                S >= 2
-                  ? "flex-row items-end gap-2 px-3 py-2 rounded-md"
-                  : "flex-row items-end gap-1 px-2 py-1 rounded-sm"
-              }
+              ref={(el) => (doubleJumpGroup = el)}
+              class="flex-col items-center gap-1 px-2 py-1 rounded-sm"
               style={{ bgColor: STRIP }}
             >
-              <Text
-                class={
-                  S >= 2
-                    ? "text-sm font-bold tracking-wide"
-                    : "text-xs font-bold tracking-wide"
-                }
-                style={{ textColor: DIM }}
-              >
-                HP
-              </Text>
-              <Text
-                ref={(el) => (hpText = el)}
-                class={S >= 2 ? "text-4xl font-bold" : "text-lg font-bold"}
-                style={{
-                  textColor: INK,
-                  width: S >= 2 ? 66 : 30,
-                  height: S >= 2 ? 40 : 20,
-                }}
-              >
-                100
-              </Text>
-              <View class="flex-row items-end gap-1">
-                <Text class="text-xs font-bold tracking-wide" style={{ textColor: LIME }}>
-                  SPEED:
-                </Text>
-                <Text
-                  ref={(el) => (speedText = el)}
-                  class="text-xs font-bold"
-                  style={{ textColor: INK, width: 34 * S, height: 12 * S }}
-                >
-                  0
-                </Text>
+              <View class="flex-row gap-1">
+                <View ref={(el) => (doubleJumpPipA = el)} style={{ width: 8 * S, height: 2 * S, bgColor: LIME }} />
+                <View ref={(el) => (doubleJumpPipB = el)} style={{ width: 8 * S, height: 2 * S, bgColor: LIME }} />
+              </View>
+              <Text ref={(el) => (doubleJumpText = el)} class="text-xs font-bold tracking-wide" style={{ textColor: LIME }}>DOUBLE JUMP</Text>
+              <Text ref={(el) => (doubleJumpStatus = el)} class="text-xs font-bold tracking-wide" style={{ textColor: LIME }}>READY</Text>
+            </View>
+          </View>
+
+          {/* Health and the primary / secondary / knife slots stay together. */}
+          <View class="flex-row items-end gap-2">
+            <View class="flex-col items-end gap-1">
+              <View class="flex-row items-end gap-1 px-2 py-1 rounded-sm" style={{ bgColor: STRIP }}>
+                <Text class="text-xs font-bold tracking-wide" style={{ textColor: DIM }}>HP</Text>
+                <Text ref={(el) => (hpText = el)} class="text-lg font-bold" style={{ textColor: INK, width: 30, height: 20 }}>100</Text>
+              </View>
+              <View style={{ width: BAR_W * S, height: 3 * S, bgColor: "#e8f0f21c" }}>
+                <View ref={(el) => (hpFill = el)} style={{ width: BAR_W * S, height: 3 * S, bgColor: INK }} />
               </View>
             </View>
-            <View style={{ width: BAR_W * S, height: 2 * S, bgColor: "#e8f0f21c" }}>
-              <View
-                ref={(el) => (hpFill = el)}
-                style={{ width: BAR_W * S, height: 2 * S, bgColor: INK }}
-              />
-            </View>
-          </View>
-          {/* Double-jump charge: stays mounted; spending the air jump drains
-              its color so availability is readable without extra text. */}
-          <View
-            ref={(el) => (doubleJumpGroup = el)}
-            class="flex-col items-center gap-1 px-2 py-1 rounded-sm"
-            style={{ bgColor: STRIP }}
-          >
-            <View class="flex-row gap-1">
-              <View
-                ref={(el) => (doubleJumpPipA = el)}
-                style={{ width: 8 * S, height: 2 * S, bgColor: LIME }}
-              />
-              <View
-                ref={(el) => (doubleJumpPipB = el)}
-                style={{ width: 8 * S, height: 2 * S, bgColor: LIME }}
-              />
-            </View>
-            <Text
-              ref={(el) => (doubleJumpText = el)}
-              class="text-xs font-bold tracking-wide"
-              style={{ textColor: LIME }}
-            >
-              DOUBLE JUMP
-            </Text>
-            <Text
-              ref={(el) => (doubleJumpStatus = el)}
-              class="text-xs font-bold tracking-wide"
-              style={{ textColor: LIME }}
-            >
-              READY
-            </Text>
-          </View>
-          {/* Ammo: fixed mag cell / reserve + reload bar (all pre-mounted) */}
-          <View class="flex-col items-end gap-1">
-            <Text class="text-xs font-bold tracking-wide" style={{ textColor: DIM }}>
-              {weaponName()}
-            </Text>
-            <View
-              ref={(el) => (reloadGroup = el)}
-              class="flex-col items-end gap-1"
-              style={{ opacity: 0 }}
-            >
-              <Text
-                class={
-                  S >= 2
-                    ? "text-sm font-bold tracking-wide"
-                    : "text-xs font-bold tracking-wide"
-                }
-                style={{ textColor: AMBER }}
-              >
-                RELOADING
-              </Text>
+
+            <View class="flex-col items-end gap-1">
+              <View class="flex-row justify-between items-center px-2 py-1 rounded-sm" style={{ width: 142 * S, bgColor: STRIP }}>
+                <Text class="text-xs font-bold tracking-wide" style={{ textColor: LIME }}>1 PRIMARY</Text>
+                <Text class="text-xs font-bold" style={{ textColor: primaryWeaponSlot() != null ? INK : DIM }}>{primaryWeaponSlot() != null ? WEAPON_NAMES[primaryWeaponSlot()!] : "NONE"}</Text>
+              </View>
+              <View class="flex-row justify-between items-center px-2 py-1 rounded-sm" style={{ width: 142 * S, bgColor: STRIP }}>
+                <Text class="text-xs font-bold tracking-wide" style={{ textColor: secondaryWeaponSlot() != null ? LIME : DIM }}>2 SECONDARY</Text>
+                <Text class="text-xs font-bold" style={{ textColor: secondaryWeaponSlot() != null ? INK : DIM }}>{secondaryWeaponSlot() != null ? WEAPON_NAMES[secondaryWeaponSlot()!] : "NONE"}</Text>
+              </View>
+              <View class="flex-row justify-between items-center px-2 py-1 rounded-sm" style={{ width: 142 * S, bgColor: STRIP }}>
+                <Text class="text-xs font-bold tracking-wide" style={{ textColor: DIM }}>3 KNIFE</Text>
+                <Text class="text-xs font-bold" style={{ textColor: DIM }}>EMPTY</Text>
+              </View>
+              <View ref={(el) => (reloadGroup = el)} class="flex-col items-end gap-1" style={{ opacity: 0 }}>
+                <Text class="text-xs font-bold tracking-wide" style={{ textColor: AMBER }}>RELOADING</Text>
+                <View style={{ width: AMMO_BAR_W * S, height: 2 * S, bgColor: "#e8f0f21c" }}>
+                  <View ref={(el) => (reloadFill = el)} style={{ width: AMMO_BAR_W * S, height: 2 * S, bgColor: AMBER }} />
+                </View>
+              </View>
+              <View class="flex-row items-end gap-1 px-2 py-1 rounded-sm" style={{ bgColor: STRIP }}>
+                <Text ref={(el) => (ammoText = el)} class="text-lg font-bold" style={{ textColor: INK, width: 24, height: 20 }}>30</Text>
+                <Text class="text-xs font-bold tracking-wide" style={{ textColor: DIM }}>{"/ " + reserve()}</Text>
+              </View>
               <View style={{ width: AMMO_BAR_W * S, height: 2 * S, bgColor: "#e8f0f21c" }}>
-                <View
-                  ref={(el) => (reloadFill = el)}
-                  style={{ width: AMMO_BAR_W * S, height: 2 * S, bgColor: AMBER }}
-                />
+                <View ref={(el) => (ammoFill = el)} style={{ width: AMMO_BAR_W * S, height: 2 * S, bgColor: LIME }} />
               </View>
             </View>
-            <View
-              class={
-                S >= 2
-                  ? "flex-row items-end gap-2 px-3 py-2 rounded-md"
-                  : "flex-row items-end gap-1 px-2 py-1 rounded-sm"
-              }
-              style={{ bgColor: STRIP }}
-            >
-              <Text
-                ref={(el) => (ammoText = el)}
-                class={S >= 2 ? "text-4xl font-bold" : "text-lg font-bold"}
-                style={{
-                  textColor: INK,
-                  width: S >= 2 ? 44 : 20,
-                  height: S >= 2 ? 40 : 20,
-                }}
-              >
-                30
-              </Text>
-              <Text
-                class={
-                  S >= 2
-                    ? "text-sm font-bold tracking-wide"
-                    : "text-xs font-bold tracking-wide"
-                }
-                style={{ textColor: DIM }}
-              >
-                {"/ " + reserve()}
-              </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Spawn loadout picker. Choose one primary and one secondary weapon. */}
+      <View
+        class="absolute inset-0 justify-center items-center"
+        style={{ bgColor: phase() === "starting" ? "#020609C8" : "#00000000", opacity: loadoutOn() ? 1 : 0, zIndex: 30 }}
+      >
+        <View class="flex-col items-center gap-1 px-3 py-2 rounded-md" style={{ bgColor: "#0a121af2" }}>
+          <Text class="text-sm font-bold tracking-wide" style={{ textColor: INK }}>CHOOSE YOUR LOADOUT</Text>
+          <Show when={phase() === "starting"} fallback={<Text class="text-sm font-bold tracking-wide" style={{ textColor: AMBER }}>MATCH LIVE · FINISH YOUR LOADOUT</Text>}>
+            <Show when={phaseAge() < ROUND_FREEZE} fallback={<Text class="text-sm font-bold tracking-wide" style={{ textColor: AMBER }}>{primaryWeaponSlot() == null ? "CHOOSE A PRIMARY TO DEPLOY" : "CHOOSE A SECONDARY TO DEPLOY"}</Text>}>
+              <Text class="text-sm font-bold tracking-wide" style={{ textColor: AMBER }}>DEPLOYING IN {Math.max(0, Math.ceil(ROUND_FREEZE - phaseAge()))}</Text>
+            </Show>
+          </Show>
+          <View class="flex-row gap-2 items-start">
+            <View class="flex-col gap-0">
+              <Text class="text-xs font-bold tracking-wide" style={{ textColor: LIME }}>PRIMARY · {primaryWeaponSlot() == null ? "CHOOSE ONE" : "SELECTED"}</Text>
+              {PRIMARY_WEAPONS.map(({ name, slot }) => (
+                <View focusable onPress={() => chooseWeapon(slot)}
+                  class={primaryWeaponSlot() === slot ? "flex-row justify-between items-center px-2 rounded-sm bg-[#243318] border-[#b8f34a]" : "flex-row justify-between items-center px-2 rounded-sm bg-[#111a24] border-[#24313a]"}
+                  style={{ width: 205 * S, height: 15 * S }}>
+                  <Text class="text-xs font-bold tracking-wide" style={{ textColor: primaryWeaponSlot() === slot ? LIME : INK, height: 13 * S }}>{name}</Text>
+                  <Text class="text-xs font-bold tracking-wide" style={{ textColor: primaryWeaponSlot() === slot ? LIME : DIM, height: 13 * S }}>{primaryWeaponSlot() === slot ? "SELECTED" : "PICK"}</Text>
+                </View>
+              ))}
             </View>
-            <View style={{ width: AMMO_BAR_W * S, height: 2 * S, bgColor: "#e8f0f21c" }}>
-              <View
-                ref={(el) => (ammoFill = el)}
-                style={{ width: AMMO_BAR_W * S, height: 2 * S, bgColor: LIME }}
-              />
-            </View>
+            <Show when={primaryWeaponSlot() != null}>
+              <View class="flex-col gap-0">
+                <Text class="text-xs font-bold tracking-wide" style={{ textColor: LIME }}>SECONDARY · {secondaryWeaponSlot() == null ? "CHOOSE ONE" : "SELECTED"}</Text>
+                {SECONDARY_WEAPONS.map(({ name, slot }) => (
+                  <View focusable onPress={() => chooseWeapon(slot)}
+                    class={secondaryWeaponSlot() === slot ? "flex-row justify-between items-center px-2 rounded-sm bg-[#243318] border-[#b8f34a]" : "flex-row justify-between items-center px-2 rounded-sm bg-[#111a24] border-[#24313a]"}
+                    style={{ width: 205 * S, height: 15 * S }}>
+                    <Text class="text-xs font-bold tracking-wide" style={{ textColor: secondaryWeaponSlot() === slot ? LIME : INK, height: 13 * S }}>{name}</Text>
+                    <Text class="text-xs font-bold tracking-wide" style={{ textColor: secondaryWeaponSlot() === slot ? LIME : DIM, height: 13 * S }}>{secondaryWeaponSlot() === slot ? "SELECTED" : "PICK"}</Text>
+                  </View>
+                ))}
+              </View>
+            </Show>
+          </View>
+          <View focusable onPress={() => strike.toMenu()} class="px-2 py-1 rounded-sm bg-[#111a24]">
+            <Text class="text-xs font-bold tracking-wide" style={{ textColor: DIM }}>ESC / EXIT TO MENU</Text>
           </View>
         </View>
       </View>

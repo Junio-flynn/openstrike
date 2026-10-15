@@ -1,0 +1,11 @@
+{
+  "notes": "User accepted the unknown-license exception for this asset; exact model listing license was not confirmed.",
+  "origin": "imported",
+  "schema": "game_dev.asset_provenance.v1",
+  "source": {
+    "bytes": 2258172,
+    "fileName": "ak12.glb",
+    "sha256": "74d51e4f2388bf00250c1d065eaf4975d2314a1d4ed8771cd649ac15bfe8556d"
+  },
+  "sourceUri": "https://sketchfab.com/ahmettanju.2013"
+}

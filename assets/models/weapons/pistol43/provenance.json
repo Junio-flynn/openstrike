@@ -1,0 +1,11 @@
+{
+  "notes": "Sketchfab CC Attribution listing.",
+  "origin": "imported",
+  "schema": "game_dev.asset_provenance.v1",
+  "source": {
+    "bytes": 20733032,
+    "fileName": "pistol43.glb",
+    "sha256": "5ad1e6b293ae1e08cc6477973fdad82f5f56f67e14e4d794be5538c7068dc23f"
+  },
+  "sourceUri": "https://sketchfab.com/3d-models/pistol-43-tactical-fps-animations-1a4c9d15818a4522aedbeb70919a17da"
+}

@@ -1,0 +1,84 @@
+{
+  "assetId": "pistol43",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/pistol-43-tactical-fps-animations-1a4c9d15818a4522aedbeb70919a17da",
+  "displayName": "Pistol43",
+  "inspection": {
+    "animationCount": 11,
+    "boundingBox": {
+      "max": [
+        45.787336987608796,
+        13.38061590362372,
+        108.29345392571668
+      ],
+      "min": [
+        -45.787336987608796,
+        -40.550796242083834,
+        -147.54391736607158
+      ],
+      "sizeMeters": [
+        91.57467397521759,
+        53.931412145707554,
+        255.83737129178826
+      ]
+    },
+    "boundingBoxEmpty": false,
+    "fileBytes": 20733032,
+    "filePath": "model.glb",
+    "generator": "glTF-Transform v4.5.1",
+    "hasNormals": true,
+    "hasSkin": true,
+    "hasTangents": true,
+    "hasUVs": true,
+    "materialCount": 4,
+    "meshCount": 4,
+    "pbr": {
+      "hasBaseColorTexture": true,
+      "hasEmissiveTexture": true,
+      "hasMetallicRoughnessTexture": true,
+      "hasNormalTexture": true,
+      "hasOcclusionTexture": false
+    },
+    "primitiveCount": 5,
+    "sceneGraphFallback": false,
+    "textureCount": 4,
+    "textureResolutions": [
+      {
+        "bytes": 68476,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "Emission",
+        "width": 2048
+      },
+      {
+        "bytes": 8938181,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "LP_TEX_Glock_Mat_Normal",
+        "width": 4096
+      },
+      {
+        "bytes": 5166985,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "LP_TEX_Glock_Mat_BaseColor",
+        "width": 4096
+      },
+      {
+        "bytes": 5123779,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "LP_TEX_Glock_Mat_Metallic-LP_TEX_Glock_Mat_Roughness",
+        "width": 4096
+      }
+    ],
+    "triangleCount": 9357,
+    "undrawnMeshCount": 0,
+    "undrawnPrimitiveCount": 0,
+    "undrawnTriangleCount": 0,
+    "vertexCount": 7871,
+    "warnings": []
+  },
+  "license": "CC-BY-4.0",
+  "schema": "game_dev.asset_metadata.v1"
+}

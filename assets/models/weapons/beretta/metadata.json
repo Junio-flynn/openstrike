@@ -1,0 +1,91 @@
+{
+  "assetId": "beretta",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/beretta-pistol-fps-animation-0313ab1888994c14abeaf444d7af3217",
+  "displayName": "Beretta",
+  "inspection": {
+    "animationCount": 2,
+    "boundingBox": {
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "sizeMeters": [
+        2,
+        2,
+        2
+      ]
+    },
+    "boundingBoxEmpty": false,
+    "fileBytes": 60356236,
+    "filePath": "model.glb",
+    "generator": "glTF-Transform v4.5.1",
+    "hasNormals": true,
+    "hasSkin": true,
+    "hasTangents": true,
+    "hasUVs": true,
+    "materialCount": 3,
+    "meshCount": 3,
+    "pbr": {
+      "hasBaseColorTexture": true,
+      "hasEmissiveTexture": false,
+      "hasMetallicRoughnessTexture": true,
+      "hasNormalTexture": true,
+      "hasOcclusionTexture": false
+    },
+    "primitiveCount": 3,
+    "sceneGraphFallback": false,
+    "textureCount": 5,
+    "textureResolutions": [
+      {
+        "bytes": 26737010,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "TEXTURA_NORMAL",
+        "width": 4096
+      },
+      {
+        "bytes": 19916345,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "TEXTURA",
+        "width": 4096
+      },
+      {
+        "bytes": 3541890,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "berettaNormal",
+        "width": 2048
+      },
+      {
+        "bytes": 5070122,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "berettaColor",
+        "width": 2048
+      },
+      {
+        "bytes": 3636487,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "berettaMetallic.png-berettaRoughness.png",
+        "width": 2048
+      }
+    ],
+    "triangleCount": 17887,
+    "undrawnMeshCount": 0,
+    "undrawnPrimitiveCount": 0,
+    "undrawnTriangleCount": 0,
+    "vertexCount": 13466,
+    "warnings": []
+  },
+  "license": "CC-BY-4.0",
+  "schema": "game_dev.asset_metadata.v1"
+}

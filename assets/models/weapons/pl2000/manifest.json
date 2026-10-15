@@ -1,0 +1,45 @@
+{
+  "assetId": "pl2000",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/animatedpistol-d52bd01ee951440294a73c40c830a541",
+  "displayName": "PL2000",
+  "files": [
+    {
+      "bytes": 134145400,
+      "kind": "model",
+      "path": "model.glb",
+      "sha256": "c356483394fa7942274bc56b982db850e3532bc1fe0899e3d48f8a3edd683544"
+    },
+    {
+      "bytes": 3338,
+      "kind": "metadata",
+      "path": "metadata.json",
+      "sha256": "68c33ed830959e53df132bf8b4a71d274ee4556a6c1c0f0854f5a9fa2ac7ec71"
+    },
+    {
+      "bytes": 371,
+      "kind": "provenance",
+      "path": "provenance.json",
+      "sha256": "730ac198aaddf3fd0f162b3e8b7202e409efc783c55ba83942b474fc8a079412"
+    },
+    {
+      "bytes": 3828,
+      "kind": "validation",
+      "path": "validation.json",
+      "sha256": "9797d4248cfe3bebe50806f4a70e6e0f9432cfe9ce925d490feb10b92a9ba043"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "model": "model.glb",
+  "packageId": "pkg_ea7d19a5ce60a9dd9b1b36b9",
+  "provenance": {
+    "origin": "imported"
+  },
+  "schema": "game_dev.asset_package.v1",
+  "validation": {
+    "errorCount": 0,
+    "passed": true,
+    "warningCount": 1
+  },
+  "version": "1.0.0"
+}

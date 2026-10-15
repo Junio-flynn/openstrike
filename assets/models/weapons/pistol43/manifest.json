@@ -1,0 +1,45 @@
+{
+  "assetId": "pistol43",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/pistol-43-tactical-fps-animations-1a4c9d15818a4522aedbeb70919a17da",
+  "displayName": "Pistol43",
+  "files": [
+    {
+      "bytes": 20733032,
+      "kind": "model",
+      "path": "model.glb",
+      "sha256": "5ad1e6b293ae1e08cc6477973fdad82f5f56f67e14e4d794be5538c7068dc23f"
+    },
+    {
+      "bytes": 2196,
+      "kind": "metadata",
+      "path": "metadata.json",
+      "sha256": "e7ebd98d41d8b704690780e714dbf432230c194dc891c5d1e09f6f7a8eb9b7c0"
+    },
+    {
+      "bytes": 391,
+      "kind": "provenance",
+      "path": "provenance.json",
+      "sha256": "6be62a7cf8fad424227f6470c26fbd907aef1b9621c261fe8e4469998eec7cb6"
+    },
+    {
+      "bytes": 3584,
+      "kind": "validation",
+      "path": "validation.json",
+      "sha256": "ce9ba987a3d0d69d13f80f41737546480da62671b887947dc01be6cd82b50da0"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "model": "model.glb",
+  "packageId": "pkg_04bab264cc72f892d6b08fe6",
+  "provenance": {
+    "origin": "imported"
+  },
+  "schema": "game_dev.asset_package.v1",
+  "validation": {
+    "errorCount": 0,
+    "passed": true,
+    "warningCount": 0
+  },
+  "version": "1.0.0"
+}

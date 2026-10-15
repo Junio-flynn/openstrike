@@ -1,0 +1,126 @@
+{
+  "assetId": "ak74u",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/animated-aks-74u-34220aaa62e44b34b7d5ac30701f2b5f",
+  "displayName": "AK74U",
+  "inspection": {
+    "animationCount": 9,
+    "boundingBox": {
+      "max": [
+        1,
+        1.4767471551895142,
+        1
+      ],
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "sizeMeters": [
+        2,
+        2.476747155189514,
+        2
+      ]
+    },
+    "boundingBoxEmpty": false,
+    "fileBytes": 119754740,
+    "filePath": "model.glb",
+    "generator": "glTF-Transform v4.5.1",
+    "hasNormals": true,
+    "hasSkin": true,
+    "hasTangents": true,
+    "hasUVs": true,
+    "materialCount": 6,
+    "meshCount": 4,
+    "pbr": {
+      "hasBaseColorTexture": true,
+      "hasEmissiveTexture": false,
+      "hasMetallicRoughnessTexture": true,
+      "hasNormalTexture": true,
+      "hasOcclusionTexture": false
+    },
+    "primitiveCount": 6,
+    "sceneGraphFallback": false,
+    "textureCount": 10,
+    "textureResolutions": [
+      {
+        "bytes": 24157951,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "Ch08_1001_Normal",
+        "width": 4096
+      },
+      {
+        "bytes": 16520386,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "Ch08_1001_Diffuse",
+        "width": 4096
+      },
+      {
+        "bytes": 27418461,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "Ch08_1002_Normal",
+        "width": 4096
+      },
+      {
+        "bytes": 7629291,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "Ch08_1002_Diffuse",
+        "width": 4096
+      },
+      {
+        "bytes": 6574162,
+        "height": 4096,
+        "mimeType": "image/jpeg",
+        "name": "Krinkov_NRM_Fix",
+        "width": 4096
+      },
+      {
+        "bytes": 17366817,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "Krinkov_Color",
+        "width": 4096
+      },
+      {
+        "bytes": 12846715,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "Krinkov_Metal-Krinkov_Rough",
+        "width": 4096
+      },
+      {
+        "bytes": 304318,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "Magazine_NRM",
+        "width": 1024
+      },
+      {
+        "bytes": 454624,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "Magazine_Color",
+        "width": 1024
+      },
+      {
+        "bytes": 513491,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "Magazine_Metal-Magazine_Rough",
+        "width": 1024
+      }
+    ],
+    "triangleCount": 69025,
+    "undrawnMeshCount": 0,
+    "undrawnPrimitiveCount": 0,
+    "undrawnTriangleCount": 0,
+    "vertexCount": 70424,
+    "warnings": []
+  },
+  "license": "CC-BY-4.0",
+  "schema": "game_dev.asset_metadata.v1"
+}

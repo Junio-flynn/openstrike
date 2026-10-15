@@ -5,10 +5,10 @@ import { BTN } from "@pocketjs/framework/input-api";
 import { onFrame } from "@pocketjs/framework/lifecycle";
 import PlayerCrosshair from "./crosshair-preview.tsx";
 import {
-  BIND_ACTIONS, CROSSHAIR_COLORS, KEY_CHOICES, SENSITIVITIES, VIEWMODEL_WEAPONS, bindings, crosshairBars,
+  BIND_ACTIONS, CROSSHAIR_COLORS, KEY_CHOICES, VIEWMODEL_WEAPONS, bindings, crosshairBars,
   crosshairColorIndex, crosshairDot, crosshairDotSize, crosshairGap, crosshairLength,
   crosshairOutline, crosshairOutlineColorIndex, crosshairOutlineSize, crosshairThickness,
-  crosshairTilt, cycleBinding, cycleSensitivity, cycleViewmodelWeapon, sensitivityIndex, setCrosshairBars, setCrosshairColorIndex, setCrosshairDot,
+  crosshairTilt, cycleBinding, cycleViewmodelWeapon, mouseSensitivity, setMouseSensitivity, setCrosshairBars, setCrosshairColorIndex, setCrosshairDot,
   setCrosshairDotSize, setCrosshairGap, setCrosshairLength, setCrosshairOutline,
   setCrosshairOutlineColorIndex, setCrosshairOutlineSize, setCrosshairThickness,
   setCrosshairTilt, setViewmodelPitch, setViewmodelScale, setViewmodelX, setViewmodelY,
@@ -20,20 +20,25 @@ import {
 const INK = "#e8f0f2";
 const DIM = "#8fa3ad";
 const LIME = "#b8f34a";
-const vp = (globalThis as { ui?: { __viewport?: { h: number } } }).ui?.__viewport ?? { h: 272 };
-const S = Math.max(1, Math.round(vp.h / 272));
+const rawViewport = (globalThis as { ui?: { __viewport?: { w?: number; h?: number } } }).ui?.__viewport;
+const vp = {
+  w: typeof rawViewport?.w === "number" && Number.isFinite(rawViewport.w) ? rawViewport.w : 480,
+  h: typeof rawViewport?.h === "number" && Number.isFinite(rawViewport.h) ? rawViewport.h : 272,
+};
+const S = Math.max(1, Math.min(Math.round(vp.h / 272), Math.floor(vp.w / 320)));
 const BUTTON = "px-2 py-1 rounded-sm border-[#0a121a00] bg-[#111a24] transition-colors duration-100 focus:bg-[#33470f] focus:border-[#b8f34a]";
 const ROW = "flex-row items-center px-2 rounded-sm bg-[#0a121a80]";
 
 export default function Settings(props: { onMainMenu: () => void }) {
-  const [page, setPage] = createSignal<"home" | "controls" | "crosshair" | "viewmodel">("home");
+  const [page, setPage] = createSignal<"home" | "controls" | "keybinds" | "crosshair" | "viewmodel">("home");
   onMount(() => {
     const disposeCursor = enableCursor({ speed: 520, dpadSpeed: 300, size: [1, 1] });
     onCleanup(disposeCursor);
   });
   return <Switch>
     <Match when={page() === "home"}><SettingsHome onControls={() => setPage("controls")} onCrosshair={() => setPage("crosshair")} onViewmodel={() => setPage("viewmodel")} onMainMenu={props.onMainMenu} /></Match>
-    <Match when={page() === "controls"}><ControlSettings onBack={() => setPage("home")} /></Match>
+    <Match when={page() === "controls"}><ControlSettings onBack={() => setPage("home")} onKeybinds={() => setPage("keybinds")} /></Match>
+    <Match when={page() === "keybinds"}><KeybindSettings onBack={() => setPage("controls")} /></Match>
     <Match when={page() === "crosshair"}><CrosshairSettings onBack={() => setPage("home")} /></Match>
     <Match when={page() === "viewmodel"}><ViewmodelSettings onBack={() => setPage("home")} /></Match>
   </Switch>;
@@ -96,24 +101,53 @@ function ViewmodelSettings(props: { onBack: () => void }) {
   </Screen>;
 }
 
-function ControlSettings(props: { onBack: () => void }) {
-  return <Screen title="KEYBINDS">
-    <Text class="text-xs tracking-wide" style={{ textColor: DIM }}>1.0 SCOPE MULTIPLIER KEEPS NORMAL SENSITIVITY</Text>
-    <View focusable onPress={cycleSensitivity} class="flex-row items-center px-2 rounded-sm border-[#0a121a00] bg-[#0a121a80] focus:bg-[#33470f] focus:border-[#b8f34a]" style={{ width: 320 * S }}>
-      <Text class="text-xs font-bold tracking-wide" style={{ textColor: INK }}>MOUSE SENSITIVITY</Text><View class="flex-1" />
-      <Text class="text-xs font-bold" style={{ textColor: LIME }}>{SENSITIVITIES[sensitivityIndex()].name + "  ›"}</Text>
-    </View>
+function ControlSettings(props: { onBack: () => void; onKeybinds: () => void }) {
+  return <Screen title="MOUSE CONTROL">
+    <Text class="text-xs tracking-wide" style={{ textColor: DIM }}>SCOPE SENSITIVITY = MOUSE SENS × SCOPE %</Text>
+    <Text class="text-xs tracking-wide" style={{ textColor: DIM }}>0.5 MOUSE SENS = HALF OF OPENSTRIKE DEFAULT</Text>
     <View style={{ width: 320 * S }}>
-      <SliderOption label="SCOPE MULTIPLIER" value={scopeMultiplier()} min={0.1} max={2.0} set={setScopeMultiplier} />
+      <SliderOption label="MOUSE SENS" value={mouseSensitivity()} min={0.1} max={3.0} set={setMouseSensitivity} />
     </View>
+    <ScopePercentControl />
+    <View focusable onPress={props.onKeybinds} class={BUTTON}><Label text="KEYBINDS ›" /></View>
+    <View focusable onPress={props.onBack} class={BUTTON}><Label text="BACK" /></View>
+    <Hint />
+  </Screen>;
+}
+
+function ScopePercentControl() {
+  const width = Math.max(240, Math.min(320 * S, vp.w - 32 * S));
+  const trackWidth = Math.max(100 * S, width - 112 * S);
+  const adjust = (amount: number) => {
+    const percent = Math.max(10, Math.min(200, Math.round((scopeMultiplier() * 100 + amount) / 5) * 5));
+    setScopeMultiplier(percent / 100);
+    savePlayerSettings();
+  };
+  return <View class="flex-col gap-1 px-2 py-1 rounded-sm bg-[#0a121a80]" style={{ width, bgColor: "#0a121a80" }}>
+    <View class="flex-row justify-between items-center">
+      <Text class="text-xs font-bold tracking-wide" style={{ textColor: INK }}>SCOPE MULTIPLIER</Text>
+      <Text class="text-sm font-bold" style={{ textColor: LIME }}>{`${Math.round(scopeMultiplier() * 100)}%`}</Text>
+    </View>
+    <View class="flex-row items-center gap-1">
+      <View focusable onPress={() => adjust(-5)} class={BUTTON} style={{ width: 32 * S }}><Text class="text-xs font-bold" style={{ textColor: LIME }}>−</Text></View>
+      <View class="justify-center" style={{ width: trackWidth, height: 6 * S, bgColor: "#263440" }}>
+        <View style={{ width: trackWidth * Math.min(1, scopeMultiplier() / 2), height: 4 * S, bgColor: LIME }} />
+      </View>
+      <View focusable onPress={() => adjust(5)} class={BUTTON} style={{ width: 32 * S }}><Text class="text-xs font-bold" style={{ textColor: LIME }}>+</Text></View>
+    </View>
+  </View>;
+}
+
+function KeybindSettings(props: { onBack: () => void }) {
+  return <Screen title="KEYBINDS">
     <View class="flex-row px-2" style={{ width: 320 * S }}>
       <Text class="text-xs tracking-wide" style={{ textColor: DIM, width: 120 * S }}>ACTION</Text>
       <Text class="text-xs tracking-wide" style={{ textColor: DIM, width: 84 * S }}>PRIMARY</Text>
       <Text class="text-xs tracking-wide" style={{ textColor: DIM }}>SECONDARY</Text>
     </View>
-    <View class="flex-col gap-1" style={{ width: 320 * S }}>
+    <View class="flex-col gap-0" style={{ width: 320 * S }}>
       <For each={BIND_ACTIONS}>{(action, i) =>
-        <View class={ROW}>
+        <View class={ROW} style={{ height: 14 * S }}>
           <Text class="text-xs font-bold tracking-wide" style={{ textColor: INK, width: 120 * S }}>{action}</Text>
           <BindButton value={KEY_CHOICES[bindings()[i()][0]]} onPress={() => cycleBinding(i(), 0)} />
           <BindButton value={KEY_CHOICES[bindings()[i()][1]]} onPress={() => cycleBinding(i(), 1)} />
@@ -126,7 +160,7 @@ function ControlSettings(props: { onBack: () => void }) {
 }
 
 function BindButton(props: { value: string; onPress: () => void }) {
-  return <View focusable onPress={props.onPress} class={BUTTON} style={{ width: 82 * S }}>
+  return <View focusable onPress={props.onPress} class="px-1 rounded-sm border-[#0a121a00] bg-[#111a24] transition-colors duration-100 focus:bg-[#33470f] focus:border-[#b8f34a]" style={{ width: 82 * S, height: 14 * S }}>
     <Text class="text-xs font-bold" style={{ textColor: LIME }}>{props.value}</Text>
   </View>;
 }

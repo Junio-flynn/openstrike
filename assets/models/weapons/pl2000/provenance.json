@@ -1,0 +1,11 @@
+{
+  "notes": "Sketchfab CC Attribution listing.",
+  "origin": "imported",
+  "schema": "game_dev.asset_provenance.v1",
+  "source": {
+    "bytes": 134145400,
+    "fileName": "pl2000.glb",
+    "sha256": "c356483394fa7942274bc56b982db850e3532bc1fe0899e3d48f8a3edd683544"
+  },
+  "sourceUri": "https://sketchfab.com/3d-models/animatedpistol-d52bd01ee951440294a73c40c830a541"
+}

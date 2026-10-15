@@ -1,0 +1,57 @@
+{
+  "assetId": "ak12",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/ahmettanju.2013",
+  "displayName": "AK12",
+  "inspection": {
+    "animationCount": 6,
+    "boundingBox": {
+      "max": [
+        0.7731469869613647,
+        1.7292250394821167,
+        0.8247413635253906
+      ],
+      "min": [
+        -0.7731469869613647,
+        1.074360966682434,
+        -0.13300800323486328
+      ],
+      "sizeMeters": [
+        1.5462939739227295,
+        0.6548640727996826,
+        0.9577493667602539
+      ]
+    },
+    "boundingBoxEmpty": false,
+    "fileBytes": 2258172,
+    "filePath": "model.glb",
+    "generator": "glTF-Transform v4.5.1",
+    "hasNormals": true,
+    "hasSkin": true,
+    "hasTangents": true,
+    "hasUVs": true,
+    "materialCount": 6,
+    "meshCount": 13,
+    "pbr": {
+      "hasBaseColorTexture": false,
+      "hasEmissiveTexture": false,
+      "hasMetallicRoughnessTexture": false,
+      "hasNormalTexture": false,
+      "hasOcclusionTexture": false
+    },
+    "primitiveCount": 13,
+    "sceneGraphFallback": false,
+    "textureCount": 0,
+    "textureResolutions": [],
+    "triangleCount": 23778,
+    "undrawnMeshCount": 0,
+    "undrawnPrimitiveCount": 0,
+    "undrawnTriangleCount": 0,
+    "vertexCount": 23847,
+    "warnings": [
+      "no base colour texture on any material: the asset is untextured and will read as flat colour"
+    ]
+  },
+  "license": "LicenseRef-Unknown",
+  "schema": "game_dev.asset_metadata.v1"
+}

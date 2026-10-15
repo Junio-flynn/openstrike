@@ -1,0 +1,45 @@
+{
+  "assetId": "fps_pistol",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/fps-pistol-animations-0d7a343dcb6f401197a73c91aee93f6d",
+  "displayName": "FPS-Pistol",
+  "files": [
+    {
+      "bytes": 141230788,
+      "kind": "model",
+      "path": "model.glb",
+      "sha256": "f659915081370153932c4d696552e6fa212fe68661f1d5174509af22558e7c90"
+    },
+    {
+      "bytes": 2168,
+      "kind": "metadata",
+      "path": "metadata.json",
+      "sha256": "8bbe1102018d29d80d053e9a6538c63667ee3b5af2b1ad34855ebbdf3b4f4642"
+    },
+    {
+      "bytes": 382,
+      "kind": "provenance",
+      "path": "provenance.json",
+      "sha256": "937fbdc31ad2bedd230a6ae70d96ac6f8c8708c72153f4153fc06375f0e625ac"
+    },
+    {
+      "bytes": 3579,
+      "kind": "validation",
+      "path": "validation.json",
+      "sha256": "823daec39d5eff9cd64ceb5efa95aab60f5342264604ed9244adb615218b4131"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "model": "model.glb",
+  "packageId": "pkg_83e7a1b390c8d15c6c91a644",
+  "provenance": {
+    "origin": "imported"
+  },
+  "schema": "game_dev.asset_package.v1",
+  "validation": {
+    "errorCount": 0,
+    "passed": true,
+    "warningCount": 0
+  },
+  "version": "1.0.0"
+}

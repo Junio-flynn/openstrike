@@ -21,7 +21,7 @@ export const CROSSHAIR_COLORS = [
 
 type SavedSettings = {
   playerName?: string;
-  sensitivity?: number; scopeMultiplier?: number; bindings?: [number, number][]; color?: number; bars?: boolean;
+  sensitivity?: number; mouseSensitivity?: number; scopeMultiplier?: number; bindings?: [number, number][]; color?: number; bars?: boolean;
   dot?: boolean; dotSize?: number; gap?: number; length?: number; thickness?: number;
   outline?: boolean; outlineSize?: number; outlineColor?: number; tilt?: number;
   viewmodelScale?: number; viewmodelX?: number; viewmodelY?: number; viewmodelZ?: number;
@@ -31,7 +31,10 @@ type SavedSettings = {
 type ViewmodelSettings = {
   scale: number; x: number; y: number; z: number; yaw: number; pitch: number;
 };
-export const VIEWMODEL_WEAPONS = ["SCORPION", "AK-74M", "UZI", "SNIPER"] as const;
+export const VIEWMODEL_WEAPONS = [
+  "SCORPION", "AK-74M", "UZI", "SNIPER", "AK-12", "AKS-74U", "AKM", "REMINGTON 870", "SNIPER (ANIMATED)",
+  "PISTOL 43", "PL2000", "BERETTA", "FPS PISTOL", "MAKAROV PM", "MARK 23", "USP-S",
+] as const;
 const DEFAULT_VIEWMODELS: readonly ViewmodelSettings[] = VIEWMODEL_WEAPONS.map(() => ({
   scale: 2.2, x: 0, y: 0, z: 0, yaw: 0, pitch: 0,
 }));
@@ -50,7 +53,10 @@ export const [playerName, setPlayerNameSignal] = createSignal(
   cleanPlayerName(saved.playerName ?? strike.initialPlayerName),
 );
 
-export const [sensitivityIndex, setSensitivityIndex] = createSignal(Math.max(0, Math.min(SENSITIVITIES.length - 1, num(saved.sensitivity, 2))));
+const legacySensitivityIndex = index(saved.sensitivity, SENSITIVITIES.length, 2);
+export const [mouseSensitivity, setMouseSensitivitySignal] = createSignal(
+  Math.round(Math.max(0.1, Math.min(3.0, num(saved.mouseSensitivity, SENSITIVITIES[legacySensitivityIndex].value))) * 10) / 10,
+);
 export const [scopeMultiplier, setScopeMultiplierSignal] = createSignal(
   Math.max(0.1, Math.min(2.0, num(saved.scopeMultiplier, 1.0))),
 );
@@ -118,7 +124,6 @@ export const setViewmodelPitch = viewmodelSetter("pitch");
 export function cycleViewmodelWeapon() {
   const next = (viewmodelWeaponIndex() + 1) % VIEWMODEL_WEAPONS.length;
   setViewmodelWeaponIndex(next);
-  strike.selectWeapon(next);
 }
 
 export const crosshairColor = () => CROSSHAIR_COLORS[crosshairColorIndex()].value;
@@ -127,7 +132,7 @@ export const crosshairOutlineColor = () => CROSSHAIR_COLORS[crosshairOutlineColo
 export function savePlayerSettings() {
   strike.saveSettings(JSON.stringify({
     playerName: playerName(),
-    sensitivity: sensitivityIndex(), scopeMultiplier: scopeMultiplier(), bindings: bindings(), color: crosshairColorIndex(),
+    mouseSensitivity: mouseSensitivity(), scopeMultiplier: scopeMultiplier(), bindings: bindings(), color: crosshairColorIndex(),
     bars: crosshairBars(), dot: crosshairDot(), dotSize: crosshairDotSize(), gap: crosshairGap(),
     length: crosshairLength(), thickness: crosshairThickness(), outline: crosshairOutline(),
     outlineSize: crosshairOutlineSize(), outlineColor: crosshairOutlineColorIndex(), tilt: crosshairTilt(),
@@ -140,11 +145,10 @@ export function savePlayerName(value: string) {
   strike.setPlayerName(cleaned);
   savePlayerSettings();
 }
-export function cycleSensitivity() {
-  const next = (sensitivityIndex() + 1) % SENSITIVITIES.length;
-  setSensitivityIndex(next);
-  strike.setMouseSensitivity(SENSITIVITIES[next].value);
-  savePlayerSettings();
+export function setMouseSensitivity(value: number) {
+  const next = Math.round(Math.max(0.1, Math.min(3.0, value)) * 10) / 10;
+  setMouseSensitivitySignal(next);
+  strike.setMouseSensitivity(next);
 }
 export function cycleBinding(action: number, slot: number) {
   const next = bindings().map((pair) => [...pair] as [number, number]);
@@ -157,7 +161,7 @@ export function stepValue(setter: (value: number) => void, value: number, delta:
   setter(Math.round(Math.max(min, Math.min(max, value + delta)) * 10) / 10);
 }
 
-strike.setMouseSensitivity(SENSITIVITIES[sensitivityIndex()].value);
+strike.setMouseSensitivity(mouseSensitivity());
 strike.setScopeMultiplier(scopeMultiplier());
 strike.setPlayerName(playerName());
 for (let action = 0; action < bindings().length; action++) {

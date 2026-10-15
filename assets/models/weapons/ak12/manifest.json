@@ -1,0 +1,45 @@
+{
+  "assetId": "ak12",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/ahmettanju.2013",
+  "displayName": "AK12",
+  "files": [
+    {
+      "bytes": 2258172,
+      "kind": "model",
+      "path": "model.glb",
+      "sha256": "74d51e4f2388bf00250c1d065eaf4975d2314a1d4ed8771cd649ac15bfe8556d"
+    },
+    {
+      "bytes": 1570,
+      "kind": "metadata",
+      "path": "metadata.json",
+      "sha256": "e843390317f12e2c93b0928002a678ae4654149c8b74a2c9fa34678e01f364cd"
+    },
+    {
+      "bytes": 398,
+      "kind": "provenance",
+      "path": "provenance.json",
+      "sha256": "dc3c5c0d5ef215a47e671c18eb521dec81d50d4de1e375438ef7bcd9295c9bf0"
+    },
+    {
+      "bytes": 2619,
+      "kind": "validation",
+      "path": "validation.json",
+      "sha256": "fe199e43834d5688c8f8275b5f1151cf0ccd75bf50af7d853ec716fbce4e9b41"
+    }
+  ],
+  "license": "LicenseRef-Unknown",
+  "model": "model.glb",
+  "packageId": "pkg_b5c36b3fb40f033bcc95161f",
+  "provenance": {
+    "origin": "imported"
+  },
+  "schema": "game_dev.asset_package.v1",
+  "validation": {
+    "errorCount": 0,
+    "passed": true,
+    "warningCount": 0
+  },
+  "version": "1.0.0"
+}

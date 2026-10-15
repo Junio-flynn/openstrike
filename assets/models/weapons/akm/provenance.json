@@ -1,0 +1,11 @@
+{
+  "notes": "Sketchfab CC Attribution listing.",
+  "origin": "imported",
+  "schema": "game_dev.asset_provenance.v1",
+  "source": {
+    "bytes": 145866032,
+    "fileName": "akm.glb",
+    "sha256": "bb97d948ccf74f57517afc98501edf67ce56294aab626f53e88ed269d21051fe"
+  },
+  "sourceUri": "https://sketchfab.com/3d-models/akm-fps-animation-a0e1e52051294bebb8a716df9e69434d"
+}

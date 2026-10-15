@@ -28,12 +28,8 @@ use crate::network::{LobbyBrowser, LobbyRequest, LocalState, NetworkSession, hos
 
 const WINDOW_SIZE: (u32, u32) = (1600, 900);
 
-fn scope_sensitivity_scale(active_weapon: usize, aim_fraction: f32, multiplier: f32) -> f32 {
-    let scope_blend = if active_weapon == 3 {
-        aim_fraction.clamp(0.0, 1.0)
-    } else {
-        0.0
-    };
+fn scope_sensitivity_scale(_active_weapon: usize, aim_fraction: f32, multiplier: f32) -> f32 {
+    let scope_blend = aim_fraction.clamp(0.0, 1.0);
     1.0 + (multiplier - 1.0) * scope_blend
 }
 
@@ -315,34 +311,32 @@ impl Game for Windowed {
                 position.x * WINDOW_SIZE.0 as f32 / self.surface_size.0.max(1) as f32,
                 position.y * WINDOW_SIZE.1 as f32 / self.surface_size.1.max(1) as f32,
             );
-        } else if self.strike.paused() {
+        } else if self.strike.paused() || self.strike.mouse_cursor_unlocked() {
             self.game.pointer = Vec2::new(-1.0, -1.0);
         }
         if !self.strike.paused() && (!self.game.multiplayer || self.game.match_live) {
-            let weapon_slot = if input.key_pressed(KeyCode::Digit1)
-                || input.key_pressed(KeyCode::Numpad1)
-            {
+            let weapon_slot = if self.strike.mouse_cursor_unlocked() {
+                None
+            } else if input.key_pressed(KeyCode::Digit1) || input.key_pressed(KeyCode::Numpad1) {
                 Some(0)
             } else if input.key_pressed(KeyCode::Digit2) || input.key_pressed(KeyCode::Numpad2) {
                 Some(1)
-            } else if input.key_pressed(KeyCode::Digit3) || input.key_pressed(KeyCode::Numpad3) {
-                Some(2)
-            } else if input.key_pressed(KeyCode::Digit4) || input.key_pressed(KeyCode::Numpad4) {
-                Some(3)
             } else {
                 None
             };
-            if let Some(slot) = weapon_slot {
-                self.game.select_weapon(slot);
+            if let Some(class) = weapon_slot {
+                self.game.switch_loadout_slot(class);
             }
-            let d = input.mouse_delta();
-            let scope_scale = scope_sensitivity_scale(
-                self.game.active_weapon,
-                self.game.aim_fraction_interpolated(1.0),
-                self.strike.scope_multiplier(),
-            );
-            let sensitivity = self.strike.mouse_sensitivity() * scope_scale;
-            self.game.apply_look(d.x * sensitivity, d.y * sensitivity);
+            if !self.strike.mouse_cursor_unlocked() {
+                let d = input.mouse_delta();
+                let scope_scale = scope_sensitivity_scale(
+                    self.game.active_weapon,
+                    self.game.aim_fraction_interpolated(1.0),
+                    self.strike.scope_multiplier(),
+                );
+                let sensitivity = self.strike.mouse_sensitivity() * scope_scale;
+                self.game.apply_look(d.x * sensitivity, d.y * sensitivity);
+            }
         }
         if input.key_pressed(KeyCode::F3) {
             self.game.debug_overlay = !self.game.debug_overlay;
@@ -390,14 +384,18 @@ impl Game for Windowed {
                 moving: player.state.vel.x * player.state.vel.x
                     + player.state.vel.z * player.state.vel.z
                     > 4.0,
-                aiming: self.game.active_weapon == 3
+                aiming: matches!(self.game.active_weapon, 3 | 8)
                     && self.game.aim_fraction_interpolated(1.0) >= 0.75,
                 speed: (player.state.vel.x * player.state.vel.x
                     + player.state.vel.z * player.state.vel.z)
                     .sqrt(),
                 vertical_velocity: player.state.vel.y,
                 wall_roll: player.wall_run_camera_roll(),
-                weapon: self.game.active_weapon,
+                weapon: if self.game.weapon_equipped {
+                    self.game.active_weapon
+                } else {
+                    16
+                },
                 fired: self.game.fired_this_tick,
             });
             self.game.set_remote_players(update.players);
@@ -466,12 +464,12 @@ impl Game for Windowed {
         }
         // Escape is handled directly above on desktop. Handheld hosts still
         // synthesize SELECT in their platform-specific input adapters.
-        if self.strike.paused()
+        if (self.strike.paused() || self.strike.mouse_cursor_unlocked())
             && input.mouse_button_down(pocket3d::winit::event::MouseButton::Left)
         {
             buttons |= 0x2000;
         }
-        let delta = if self.strike.paused() {
+        let delta = if self.strike.paused() || self.strike.mouse_cursor_unlocked() {
             Vec2::ZERO
         } else {
             input.mouse_delta()
@@ -560,7 +558,7 @@ impl Game for Windowed {
     }
 
     fn wants_mouse_capture(&self) -> Option<bool> {
-        Some(!self.strike.paused())
+        Some(!self.strike.paused() && !self.strike.mouse_cursor_unlocked())
     }
 
     fn escape_pressed(&mut self) {
@@ -597,10 +595,10 @@ mod scope_sensitivity_tests {
     use super::scope_sensitivity_scale;
 
     #[test]
-    fn one_preserves_sensitivity_and_other_values_blend_with_scope() {
+    fn aim_sensitivity_multiplier_blends_for_all_weapons() {
         assert_eq!(scope_sensitivity_scale(3, 1.0, 1.0), 1.0);
         assert_eq!(scope_sensitivity_scale(3, 1.0, 0.5), 0.5);
         assert_eq!(scope_sensitivity_scale(3, 0.5, 0.5), 0.75);
-        assert_eq!(scope_sensitivity_scale(2, 1.0, 0.5), 1.0);
+        assert_eq!(scope_sensitivity_scale(2, 1.0, 0.5), 0.5);
     }
 }

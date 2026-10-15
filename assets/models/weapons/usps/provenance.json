@@ -1,0 +1,11 @@
+{
+  "notes": "Sketchfab CC Attribution listing.",
+  "origin": "imported",
+  "schema": "game_dev.asset_provenance.v1",
+  "source": {
+    "bytes": 46815112,
+    "fileName": "usp-s.glb",
+    "sha256": "e9663f576759de85fdd16fa43123d0e964eee26b82846d62d2c78acc58b5b86f"
+  },
+  "sourceUri": "https://sketchfab.com/3d-models/pistol-usp-s-weapon-model-cs2-5e0c452b1e2e4d7c9ea80638a94afaac"
+}

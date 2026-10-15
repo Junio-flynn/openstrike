@@ -1,0 +1,45 @@
+{
+  "assetId": "ak74u",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/animated-aks-74u-34220aaa62e44b34b7d5ac30701f2b5f",
+  "displayName": "AK74U",
+  "files": [
+    {
+      "bytes": 119754740,
+      "kind": "model",
+      "path": "model.glb",
+      "sha256": "1f041a07f95164b84988ffea22715bf73252441c68a4a5604736c0ea16fdcc96"
+    },
+    {
+      "bytes": 2983,
+      "kind": "metadata",
+      "path": "metadata.json",
+      "sha256": "d942d2677523a43137bcf402d5bf6ffc4732eb786d108722bf97852753766440"
+    },
+    {
+      "bytes": 372,
+      "kind": "provenance",
+      "path": "provenance.json",
+      "sha256": "e045ee5a4d65c02a29758360f59672b1af9805db7aa363cac924bb81454a7134"
+    },
+    {
+      "bytes": 3580,
+      "kind": "validation",
+      "path": "validation.json",
+      "sha256": "6fd05d7e60b7cb175b580d25a47a5cfacb8fa589f53afc4e790c9f536d4f066f"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "model": "model.glb",
+  "packageId": "pkg_6b1a36a29f5296bf5c2d4c56",
+  "provenance": {
+    "origin": "imported"
+  },
+  "schema": "game_dev.asset_package.v1",
+  "validation": {
+    "errorCount": 0,
+    "passed": true,
+    "warningCount": 0
+  },
+  "version": "1.0.0"
+}

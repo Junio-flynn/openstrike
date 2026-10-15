@@ -115,7 +115,7 @@ pub fn run_screenshot(mut game: OpenStrike, args: &Args) -> Result<()> {
     if !args.hud {
         // Clean vista: clear bots, settle, look slightly down the map.
         game.bots.clear();
-        game.weapon_assets = [None, None, None, None];
+        game.weapon_assets = [const { None }; 16];
         if args.pos.is_none() {
             settle(&mut game, 48);
         }

@@ -1,0 +1,79 @@
+{
+  "assetId": "mark23",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive.",
+  "displayName": "Mark23",
+  "inspection": {
+    "animationCount": 5,
+    "boundingBox": {
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "sizeMeters": [
+        2,
+        2,
+        2
+      ]
+    },
+    "boundingBoxEmpty": false,
+    "fileBytes": 3079076,
+    "filePath": "model.glb",
+    "generator": "glTF-Transform v4.5.1",
+    "hasNormals": true,
+    "hasSkin": true,
+    "hasTangents": true,
+    "hasUVs": true,
+    "materialCount": 4,
+    "meshCount": 5,
+    "pbr": {
+      "hasBaseColorTexture": true,
+      "hasEmissiveTexture": false,
+      "hasMetallicRoughnessTexture": false,
+      "hasNormalTexture": false,
+      "hasOcclusionTexture": false
+    },
+    "primitiveCount": 6,
+    "sceneGraphFallback": false,
+    "textureCount": 3,
+    "textureResolutions": [
+      {
+        "bytes": 1285313,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "Hand_D",
+        "width": 1024
+      },
+      {
+        "bytes": 334764,
+        "height": 512,
+        "mimeType": "image/png",
+        "name": "Glove_D",
+        "width": 512
+      },
+      {
+        "bytes": 313681,
+        "height": 512,
+        "mimeType": "image/png",
+        "name": "Mark23_D",
+        "width": 512
+      }
+    ],
+    "triangleCount": 7774,
+    "undrawnMeshCount": 0,
+    "undrawnPrimitiveCount": 0,
+    "undrawnTriangleCount": 0,
+    "vertexCount": 12151,
+    "warnings": [
+      "texture is below 1024px on an axis and will blur at close range: Glove_D (512x512), Mark23_D (512x512)"
+    ]
+  },
+  "license": "LicenseRef-Unknown",
+  "schema": "game_dev.asset_metadata.v1"
+}

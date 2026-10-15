@@ -26,7 +26,7 @@ function App() {
   let openedConnectedLobby = false;
   let matchWasStarted = false;
   strike.onTick((s) => {
-    if (desktop && inMenu()) {
+    if (desktop) {
       if (s.pointerX < 0 || s.pointerY < 0) clearCursorPosition();
       else setCursorPosition(s.pointerX, s.pointerY);
     }

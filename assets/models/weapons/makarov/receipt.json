@@ -1,0 +1,23 @@
+{
+  "completedAt": "2026-10-14T04:09:37.192Z",
+  "destination": {
+    "assetId": "makarov",
+    "version": "1.0.0"
+  },
+  "evidence": {
+    "blenderNormalizationPerformed": false,
+    "gpuImportTestPerformed": false,
+    "humanVisualReviewPerformed": false,
+    "modelBytesCopiedAndHashed": true,
+    "policyValidationCompleted": true,
+    "staticInspectionCompleted": true
+  },
+  "manifestSha256": "12d09b0e16751e4dd0853f3b4076e9988313ffbec737e78257bb29102c12f28e",
+  "packageId": "pkg_7d9e0979b2a9e5797e7f93d9",
+  "schema": "game_dev.package_receipt.v1",
+  "source": {
+    "bytes": 47501428,
+    "fileName": "makarov.glb",
+    "sha256": "37103bed0a168903d3e7c16c07b7f1720e2a4fab02467a76ddac4fe9c2eb7ea9"
+  }
+}

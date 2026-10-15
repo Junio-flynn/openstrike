@@ -1,0 +1,23 @@
+{
+  "completedAt": "2026-10-14T04:09:38.759Z",
+  "destination": {
+    "assetId": "sniper",
+    "version": "1.0.0"
+  },
+  "evidence": {
+    "blenderNormalizationPerformed": false,
+    "gpuImportTestPerformed": false,
+    "humanVisualReviewPerformed": false,
+    "modelBytesCopiedAndHashed": true,
+    "policyValidationCompleted": true,
+    "staticInspectionCompleted": true
+  },
+  "manifestSha256": "0d19d926dd34340b71fbeba0bc8ab9886f224909990ae1669b922920037e0f1f",
+  "packageId": "pkg_d4e2ca70155ae3282fba510c",
+  "schema": "game_dev.package_receipt.v1",
+  "source": {
+    "bytes": 62884748,
+    "fileName": "sniper.glb",
+    "sha256": "fbed131fa129693f7040b7e87aeb11061699204f7fb7cd9d0409e380b65e60d8"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "notes": "Sketchfab CC Attribution listing.",
+  "origin": "imported",
+  "schema": "game_dev.asset_provenance.v1",
+  "source": {
+    "bytes": 60356236,
+    "fileName": "beretta.glb",
+    "sha256": "598e68831fcf9795dbc77ca9b517888e466d7fb8e3942ccc985869ef13d403c4"
+  },
+  "sourceUri": "https://sketchfab.com/3d-models/beretta-pistol-fps-animation-0313ab1888994c14abeaf444d7af3217"
+}

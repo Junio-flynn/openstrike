@@ -1,0 +1,11 @@
+{
+  "notes": "Sketchfab CC Attribution listing; source also indicates NoAI terms.",
+  "origin": "imported",
+  "schema": "game_dev.asset_provenance.v1",
+  "source": {
+    "bytes": 47501428,
+    "fileName": "makarov.glb",
+    "sha256": "37103bed0a168903d3e7c16c07b7f1720e2a4fab02467a76ddac4fe9c2eb7ea9"
+  },
+  "sourceUri": "https://sketchfab.com/3d-models/makarov-pm-fps-animations-d02ebd58e3cf44acb7af73e3f156be28"
+}

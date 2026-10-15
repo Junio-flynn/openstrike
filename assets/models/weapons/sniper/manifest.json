@@ -1,0 +1,45 @@
+{
+  "assetId": "sniper",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/sniper-fps-animation-f5174e499bff4d96b528c891b08c2015",
+  "displayName": "Sniper",
+  "files": [
+    {
+      "bytes": 62884748,
+      "kind": "model",
+      "path": "model.glb",
+      "sha256": "fbed131fa129693f7040b7e87aeb11061699204f7fb7cd9d0409e380b65e60d8"
+    },
+    {
+      "bytes": 2149,
+      "kind": "metadata",
+      "path": "metadata.json",
+      "sha256": "6aba0d73c09af6c857a9a3fbfdba0522abba9e40b26eab31a1f19ea238edd828"
+    },
+    {
+      "bytes": 376,
+      "kind": "provenance",
+      "path": "provenance.json",
+      "sha256": "38de4228b5cb487b7b7536fdb3ce48fd272e2196dc4889eddf9f16d4eaf9b48b"
+    },
+    {
+      "bytes": 3579,
+      "kind": "validation",
+      "path": "validation.json",
+      "sha256": "cfac5c73121ea205b8ae93ebc553e802d6f90b8e354d441a4c5e8d383bdeabc2"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "model": "model.glb",
+  "packageId": "pkg_d4e2ca70155ae3282fba510c",
+  "provenance": {
+    "origin": "imported"
+  },
+  "schema": "game_dev.asset_package.v1",
+  "validation": {
+    "errorCount": 0,
+    "passed": true,
+    "warningCount": 0
+  },
+  "version": "1.0.0"
+}

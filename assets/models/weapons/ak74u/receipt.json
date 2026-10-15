@@ -1,0 +1,23 @@
+{
+  "completedAt": "2026-10-14T04:09:33.035Z",
+  "destination": {
+    "assetId": "ak74u",
+    "version": "1.0.0"
+  },
+  "evidence": {
+    "blenderNormalizationPerformed": false,
+    "gpuImportTestPerformed": false,
+    "humanVisualReviewPerformed": false,
+    "modelBytesCopiedAndHashed": true,
+    "policyValidationCompleted": true,
+    "staticInspectionCompleted": true
+  },
+  "manifestSha256": "5b23e184fa981a99736e30443bf700221ec30ab3048c1689b63dae88285ff90b",
+  "packageId": "pkg_6b1a36a29f5296bf5c2d4c56",
+  "schema": "game_dev.package_receipt.v1",
+  "source": {
+    "bytes": 119754740,
+    "fileName": "ak74u.glb",
+    "sha256": "1f041a07f95164b84988ffea22715bf73252441c68a4a5604736c0ea16fdcc96"
+  }
+}

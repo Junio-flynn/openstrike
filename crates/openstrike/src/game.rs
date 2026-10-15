@@ -9,6 +9,7 @@ use std::sync::Arc;
 
 use pocket3d::bsp::Hull;
 use pocket3d::bsp::MapData;
+use pocket3d::anim::Clip;
 use pocket3d::input::Input;
 use pocket3d::prelude::*;
 use pocket3d::winit::event::MouseButton;
@@ -23,6 +24,65 @@ use crate::network::{LobbyInfo, PlayerState as RemotePlayer};
 use crate::weapon::{build_bullet_hole, build_rifle};
 
 const REMOTE_ANIM_BLEND_SECONDS: f32 = 0.16;
+
+fn compact_name_starts_with(value: &str, prefix: &str) -> bool {
+    let mut prefix = prefix.chars();
+    let mut expected = prefix.next();
+    for ch in value.chars().filter(|ch| ch.is_ascii_alphanumeric()) {
+        let Some(want) = expected else {
+            return true;
+        };
+        if !ch.eq_ignore_ascii_case(&want) {
+            return false;
+        }
+        expected = prefix.next();
+    }
+    expected.is_none()
+}
+
+fn clip_name_matches(value: &str, prefix: &str) -> bool {
+    value
+        .split(|ch: char| !ch.is_ascii_alphanumeric())
+        .any(|part| compact_name_starts_with(part, prefix))
+}
+
+fn clip_has_token(value: &str, token: &str) -> bool {
+    value
+        .split(|ch: char| !ch.is_ascii_alphanumeric())
+        .any(|part| part.eq_ignore_ascii_case(token))
+}
+
+fn weapon_clip(clips: &[Clip], action: &str) -> Option<usize> {
+    let aliases: &[&str] = match action {
+        "idle" => &["idle"],
+        "fire" => &["fire", "shoot", "shot", "firing"],
+        "reload_empty" => &["reloadempty", "reloadfull", "reload2", "reloatt"],
+        "reload" => &["reload", "reloat", "reloadfast", "reload1", "reloatt", "reloatf"],
+        "inspect" => &["inspect", "inspec", "lookat"],
+        "equip" => &["equip", "draw", "deploy"],
+        _ => &[],
+    };
+    aliases.iter().find_map(|alias| {
+        clips
+            .iter()
+            .position(|clip| {
+                clip_name_matches(&clip.name, alias)
+                    && (action != "fire" || !clip_has_token(&clip.name, "additive"))
+            })
+    })
+}
+
+fn weapon_default_yaw(slot: usize) -> f32 {
+    use core::f32::consts::{FRAC_PI_2, PI};
+    match slot {
+        // These imports have their barrel along +Z in their authored pose.
+        3 | 4 | 5 | 7 | 8 | 10 | 12 | 13 | 14 | 15 => PI,
+        // AKM and Beretta imports are laid along +X.
+        6 | 11 => FRAC_PI_2,
+        // Pistol 43's barrel already points along -Z.
+        _ => 0.0,
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum HitZone {
@@ -128,8 +188,8 @@ pub struct OpenStrike {
     pub world_weapon_asset: Option<Arc<ModelAsset>>,
     bullet_hole_asset: Option<Arc<ModelAsset>>,
     bullet_holes: Vec<BulletHoleMark>,
-    /// Viewmodels in weapon-slot order: Scorpion, AK-74M, UZI, sniper.
-    pub weapon_assets: [Option<Arc<ModelAsset>>; 4],
+    /// Viewmodels in shared primary/secondary catalog order.
+    pub weapon_assets: [Option<Arc<ModelAsset>>; 16],
     /// Elapsed time in the one-shot viewmodel inspect animation; negative
     /// while inspection is inactive.
     pub inspect_time: f32,
@@ -138,7 +198,7 @@ pub struct OpenStrike {
     pub equip_time: f32,
     pub prev_equip_time: f32,
     /// Per-weapon tuning: scale, local X/Y/Z, yaw degrees, pitch degrees.
-    pub viewmodel_settings: [[f32; 6]; 4],
+    pub viewmodel_settings: [[f32; 6]; 16],
     /// Exit the app after this many seconds (smoke tests).
     pub auto_quit: Option<f32>,
     pub pointer: Vec2,
@@ -226,12 +286,12 @@ impl OpenStrike {
             world_weapon_asset: None,
             bullet_hole_asset: None,
             bullet_holes: Vec::new(),
-            weapon_assets: [None, None, None, None],
+            weapon_assets: [const { None }; 16],
             inspect_time: -1.0,
             prev_inspect_time: -1.0,
             equip_time: 0.0,
             prev_equip_time: 0.0,
-            viewmodel_settings: [[2.2, 0.0, 0.0, 0.0, 0.0, 0.0]; 4],
+            viewmodel_settings: [[2.2, 0.0, 0.0, 0.0, 0.0, 0.0]; 16],
             auto_quit: None,
             pointer: Vec2::new(-1.0, -1.0),
             remote_players: Vec::new(),
@@ -297,6 +357,22 @@ impl OpenStrike {
             "models/BoltActionSniper_Viewmodel.glb",
             "Bolt-action sniper",
         );
+        for (slot, path, label) in [
+            (4, "models/weapons/ak12/model.glb", "AK-12"),
+            (5, "models/weapons/ak74u/model.glb", "AKS-74U"),
+            (6, "models/weapons/akm/model.glb", "AKM"),
+            (7, "models/weapons/remington/model.glb", "Remington 870"),
+            (8, "models/weapons/sniper/model.glb", "Sniper"),
+            (9, "models/weapons/pistol43/model.glb", "Pistol 43"),
+            (10, "models/weapons/pl2000/model.glb", "PL2000"),
+            (11, "models/weapons/beretta/model.glb", "Beretta"),
+            (12, "models/weapons/fps_pistol/model.glb", "FPS pistol"),
+            (13, "models/weapons/makarov/model.glb", "Makarov PM"),
+            (14, "models/weapons/mark23/model.glb", "Mark 23"),
+            (15, "models/weapons/usps/model.glb", "USP-S"),
+        ] {
+            self.weapon_assets[slot] = load_weapon(path, label);
+        }
 
         match crate::args::find_asset("models/Soldier.glb") {
             Some(path) => {
@@ -472,9 +548,14 @@ impl OpenStrike {
         let resets_round = matches!(&cmd, Command::ResetRound);
         let selects_weapon = matches!(&cmd, Command::SelectWeapon(_));
         let previous_weapon = self.sim.active_weapon;
+        let was_weapon_equipped = self.sim.weapon_equipped;
         let clip = self.bot_walk_clip;
         self.sim.apply(cmd, clip);
-        if resets_round || (selects_weapon && self.sim.active_weapon != previous_weapon) {
+        if resets_round
+            || (selects_weapon
+                && (self.sim.active_weapon != previous_weapon
+                    || (!was_weapon_equipped && self.sim.weapon_equipped)))
+        {
             self.inspect_time = -1.0;
             self.prev_inspect_time = -1.0;
             self.equip_time = 0.0;
@@ -486,7 +567,7 @@ impl OpenStrike {
     /// Called from the render-frame input path so short number-key taps cannot
     /// fall between fixed simulation ticks.
     pub fn select_weapon(&mut self, slot: usize) -> bool {
-        if !self.sim.switch_weapon(slot) {
+        if !self.sim.choose_weapon(slot) {
             return false;
         }
         self.inspect_time = -1.0;
@@ -498,6 +579,18 @@ impl OpenStrike {
             slot + 1,
             self.sim.weapon_name()
         );
+        true
+    }
+
+    /// Switch between the selected primary (1) and secondary (2) weapons.
+    pub fn switch_loadout_slot(&mut self, class: usize) -> bool {
+        if !self.sim.switch_loadout_slot(class) {
+            return false;
+        }
+        self.inspect_time = -1.0;
+        self.prev_inspect_time = -1.0;
+        self.equip_time = 0.0;
+        self.prev_equip_time = 0.0;
         true
     }
 
@@ -594,6 +687,7 @@ impl OpenStrike {
         // starts it, while firing or reloading immediately returns control to
         // the corresponding weapon animation.
         if input.key_pressed(KeyCode::KeyF)
+            && self.sim.weapon_equipped
             && !self.sim.weapon.reloading()
             && self.sim.weapon.cooldown <= 0.0
         {
@@ -607,10 +701,7 @@ impl OpenStrike {
             let duration = self.weapon_assets[self.sim.active_weapon]
                 .as_ref()
                 .and_then(|rifle| {
-                    rifle
-                        .clips
-                        .iter()
-                        .find(|clip| clip.name.eq_ignore_ascii_case("Inspect"))
+                    weapon_clip(&rifle.clips, "inspect").map(|clip| &rifle.clips[clip])
                 })
                 .map(|clip| clip.duration)
                 .unwrap_or(7.9);
@@ -930,7 +1021,7 @@ impl OpenStrike {
                 let character_transform = inst.transform;
                 self.scene.models.push(inst);
 
-                if player.alive {
+                if player.alive && player.weapon < self.weapon_assets.len() {
                     if let Some(weapon) = &self.world_weapon_asset {
                         let mut held = ModelInstance::new(weapon.clone());
                         let right_hand = asset
@@ -1004,7 +1095,7 @@ impl OpenStrike {
                             .normalize_or_zero();
                         self.remote_muzzles
                             .insert(player.id, (muzzle, muzzle_direction));
-                        if player.weapon == 3 {
+                        if matches!(player.weapon, 3 | 8) {
                             // Rear optic lens on the shared third-person rifle.
                             let scope = held.transform.transform_point3(Vec3::new(0.0, 2.35, -5.4));
                             self.remote_scopes.insert(player.id, scope);
@@ -1029,10 +1120,14 @@ impl OpenStrike {
 
         // Viewmodel (interpolated with the camera — see viewmodel_transform_at).
         let active_asset = &self.weapon_assets[self.sim.active_weapon];
-        let sniper_scoped =
-            self.sim.active_weapon == 3 && self.sim.aim_fraction_interpolated(alpha) >= 0.92;
-        self.scene.viewmodel = match (active_asset, self.sim.player.alive && !sniper_scoped) {
-            (Some(rifle), true) => {
+        let sniper_scoped = matches!(self.sim.active_weapon, 3 | 8)
+            && self.sim.aim_fraction_interpolated(alpha) >= 0.92;
+        self.scene.viewmodel = match (
+            self.sim.weapon_equipped,
+            active_asset,
+            self.sim.player.alive && !sniper_scoped,
+        ) {
+            (true, Some(rifle), true) => {
                 let mut vm = ModelInstance::new(rifle.clone());
                 let [scale, x, y, z, yaw, pitch] = self.viewmodel_settings[self.sim.active_weapon];
                 // Imported packs use different source units. Normalize every
@@ -1042,13 +1137,32 @@ impl OpenStrike {
                     .as_ref()
                     .map(|asset| asset.height())
                     .unwrap_or_else(|| rifle.height());
-                let asset_scale = if self.sim.active_weapon == 3 {
-                    0.18
+                let model_extent = (rifle.aabb.1 - rifle.aabb.0).max_element().max(0.001);
+                let reference_extent = self.weapon_assets[0]
+                    .as_ref()
+                    .map(|asset| (asset.aabb.1 - asset.aabb.0).max_element())
+                    .unwrap_or(reference_height);
+                let normalized_scale = if self.sim.active_weapon >= 4 {
+                    // Imported GLBs don't share a consistent up axis, so
+                    // their Y extent is not a useful size reference. Match
+                    // their longest weapon dimension to the original rifle.
+                    // Sidearms get a compact silhouette at the same time.
+                    let weapon_class_scale = if self.sim.active_weapon >= 9 {
+                        0.72
+                    } else if self.sim.active_weapon == 8 {
+                        1.08
+                    } else {
+                        1.0
+                    };
+                    scale * reference_extent / model_extent * weapon_class_scale
                 } else {
-                    1.0
+                    let asset_scale = if self.sim.active_weapon == 3 {
+                        0.18
+                    } else {
+                        1.0
+                    };
+                    scale * reference_height / rifle.height().max(0.001) * asset_scale
                 };
-                let normalized_scale =
-                    scale * reference_height / rifle.height().max(0.001) * asset_scale;
                 // Scale around the visible model center, while preserving
                 // the established 2.2-size placement. Scaling around the
                 // glTF origin also changed camera depth, making equal slider
@@ -1059,17 +1173,17 @@ impl OpenStrike {
                 // grows the weapon upward without also changing its Y level.
                 let scale_anchor = Vec3::new(center.x, rifle.aabb.0.y, center.z);
                 let scale_compensation = scale_anchor * (2.2 - normalized_scale);
+                let screen_x = if self.sim.active_weapon >= 4 {
+                    x - 3.5
+                } else {
+                    x
+                };
                 vm.transform = self.sim.viewmodel_transform_at(alpha)
-                    * Mat4::from_translation(Vec3::new(x, y, z))
-                    * Mat4::from_rotation_y(yaw.to_radians())
+                    * Mat4::from_translation(Vec3::new(screen_x, y, z))
+                    * Mat4::from_rotation_y(yaw.to_radians() + weapon_default_yaw(self.sim.active_weapon))
                     * Mat4::from_rotation_x(pitch.to_radians())
                     * Mat4::from_translation(scale_compensation)
                     * Mat4::from_translation(center)
-                    * Mat4::from_rotation_y(if self.sim.active_weapon == 3 {
-                        core::f32::consts::PI
-                    } else {
-                        0.0
-                    })
                     * Mat4::from_translation(-center)
                     * Mat4::from_scale(Vec3::splat(normalized_scale));
                 if !rifle.clips.is_empty() {
@@ -1077,55 +1191,55 @@ impl OpenStrike {
                     // camera space; the shared viewmodel transform adds only
                     // interpolated placement, recoil, bob, and sway.
 
-                    let named = |name: &str| {
-                        rifle
-                            .clips
-                            .iter()
-                            .position(|clip| clip.name.eq_ignore_ascii_case(name))
-                    };
+                    let named = |name: &str| weapon_clip(&rifle.clips, name);
                     let render_time =
                         (self.sim.time - (1.0 - alpha.clamp(0.0, 1.0)) / 64.0).max(0.0);
                     let (clip, time, looping) = if self.sim.weapon.reloading() {
-                        let name = if self.sim.weapon.ammo == 0 {
-                            "Reload_Empty"
+                        let action = if self.sim.weapon.ammo == 0 {
+                            "reload_empty"
                         } else {
-                            "Reload"
+                            "reload"
                         };
-                        let clip = named(name).or_else(|| named("Reload")).unwrap_or(0);
-                        let reload_left = self.sim.weapon.prev_reload_left
-                            + (self.sim.weapon.reload_left - self.sim.weapon.prev_reload_left)
-                                * alpha;
-                        let reload_frac =
-                            (1.0 - reload_left / self.sim.weapon.cfg.reload_time).clamp(0.0, 1.0);
-                        (clip, reload_frac * rifle.clips[clip].duration, false)
-                    } else if named("Fire")
-                        .is_some_and(|clip| self.sim.weapon.shot_age < rifle.clips[clip].duration)
-                    {
-                        let clip = if self.sim.active_weapon == 3
-                            && self.sim.aim_fraction_interpolated(alpha) >= 0.5
-                        {
-                            named("Fire_Aimed").or_else(|| named("Fire")).unwrap_or(0)
+                        if let Some(clip) = named(action).or_else(|| named("reload")) {
+                            let reload_left = self.sim.weapon.prev_reload_left
+                                + (self.sim.weapon.reload_left - self.sim.weapon.prev_reload_left)
+                                    * alpha;
+                            let reload_frac = (1.0
+                                - reload_left / self.sim.weapon.cfg.reload_time)
+                                .clamp(0.0, 1.0);
+                            (clip, reload_frac * rifle.clips[clip].duration, false)
                         } else {
-                            named("Fire").unwrap_or(0)
-                        };
+                            (0, 0.0, false)
+                        }
+                    } else if named("fire").is_some_and(|clip| {
+                        self.sim.weapon.shot_age < rifle.clips[clip].duration
+                    }) {
+                        let clip = named("fire").unwrap_or(0);
                         let shot_age = self.sim.weapon.prev_shot_age
                             + (self.sim.weapon.shot_age - self.sim.weapon.prev_shot_age) * alpha;
                         (clip, shot_age, false)
-                    } else if self.inspect_time >= 0.0 && named("Inspect").is_some() {
-                        let clip = named("Inspect").unwrap_or(0);
+                    } else if self.inspect_time >= 0.0 && named("inspect").is_some() {
+                        let clip = named("inspect").unwrap_or(0);
                         let inspect_time = self.prev_inspect_time
                             + (self.inspect_time - self.prev_inspect_time) * alpha;
                         (clip, inspect_time, false)
-                    } else if named("Equip")
+                    } else if named("equip")
                         .is_some_and(|clip| self.equip_time < rifle.clips[clip].duration)
                     {
-                        let clip = named("Equip").unwrap_or(0);
+                        let clip = named("equip").unwrap_or(0);
                         let equip_time =
                             self.prev_equip_time + (self.equip_time - self.prev_equip_time) * alpha;
                         (clip, equip_time, false)
                     } else {
-                        let clip = named("Idle").unwrap_or(0);
-                        (clip, render_time, true)
+                        if let Some(clip) = named("idle") {
+                            (clip, render_time, true)
+                        } else {
+                            // Generic FBX/scene clips can contain a whole
+                            // timeline of actions but expose no usable action
+                            // names. Never loop clip zero as fake idle: that
+                            // made the sniper play the same motion forever.
+                            (0, 0.0, false)
+                        }
                     };
                     vm.anim = AnimState {
                         clip,
@@ -1166,7 +1280,7 @@ impl OpenStrike {
         for player in self
             .remote_players
             .iter()
-            .filter(|player| player.alive && player.weapon == 3 && player.aiming)
+            .filter(|player| player.alive && matches!(player.weapon, 3 | 8) && player.aiming)
         {
             if let Some(&pos) = self.remote_scopes.get(&player.id) {
                 let toward_camera = (self.camera.pos - pos).normalize_or_zero();

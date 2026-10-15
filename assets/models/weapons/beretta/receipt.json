@@ -1,0 +1,23 @@
+{
+  "completedAt": "2026-10-14T04:09:35.557Z",
+  "destination": {
+    "assetId": "beretta",
+    "version": "1.0.0"
+  },
+  "evidence": {
+    "blenderNormalizationPerformed": false,
+    "gpuImportTestPerformed": false,
+    "humanVisualReviewPerformed": false,
+    "modelBytesCopiedAndHashed": true,
+    "policyValidationCompleted": true,
+    "staticInspectionCompleted": true
+  },
+  "manifestSha256": "549326ab6966121005b8379e8ffd7a4ee109c338af0e63753c3e63e4c5e95115",
+  "packageId": "pkg_c7ee2b856f63dcdec7b4c4e6",
+  "schema": "game_dev.package_receipt.v1",
+  "source": {
+    "bytes": 60356236,
+    "fileName": "beretta.glb",
+    "sha256": "598e68831fcf9795dbc77ca9b517888e466d7fb8e3942ccc985869ef13d403c4"
+  }
+}

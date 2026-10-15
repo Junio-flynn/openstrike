@@ -1,0 +1,45 @@
+{
+  "assetId": "remington",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/fps-arms-remington-shotgun-e68ef617fe8a48cca8610d016ffd5881",
+  "displayName": "Remington",
+  "files": [
+    {
+      "bytes": 40859196,
+      "kind": "model",
+      "path": "model.glb",
+      "sha256": "d617c54bb275a90674b1d3ee2e6d5d45b57139bf1e4d5b6f00b0ea21c6dd0670"
+    },
+    {
+      "bytes": 3004,
+      "kind": "metadata",
+      "path": "metadata.json",
+      "sha256": "825551c58d49e13007ea1583e5a4b6aaae7c1b10b6c1248fdc166883b0441053"
+    },
+    {
+      "bytes": 419,
+      "kind": "provenance",
+      "path": "provenance.json",
+      "sha256": "314ff7b800995a0121d1e64dc333202b65abf399c78a2251c13096bea6bf7d2d"
+    },
+    {
+      "bytes": 3770,
+      "kind": "validation",
+      "path": "validation.json",
+      "sha256": "78e9718d0dddab2f05b53beaa3f696ae118947dd8f881ed512a6188b87a72887"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "model": "model.glb",
+  "packageId": "pkg_75edf525eab6130ccd4ec946",
+  "provenance": {
+    "origin": "imported"
+  },
+  "schema": "game_dev.asset_package.v1",
+  "validation": {
+    "errorCount": 0,
+    "passed": true,
+    "warningCount": 1
+  },
+  "version": "1.0.0"
+}

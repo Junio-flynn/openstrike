@@ -1,0 +1,296 @@
+{
+  "assetId": "akm",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/akm-fps-animation-a0e1e52051294bebb8a716df9e69434d",
+  "displayName": "AKM",
+  "inspection": {
+    "animationCount": 2,
+    "boundingBox": {
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "sizeMeters": [
+        2,
+        2,
+        2
+      ]
+    },
+    "boundingBoxEmpty": false,
+    "fileBytes": 145866032,
+    "filePath": "model.glb",
+    "generator": "glTF-Transform v4.5.1",
+    "hasNormals": true,
+    "hasSkin": true,
+    "hasTangents": true,
+    "hasUVs": true,
+    "materialCount": 13,
+    "meshCount": 3,
+    "pbr": {
+      "hasBaseColorTexture": true,
+      "hasEmissiveTexture": false,
+      "hasMetallicRoughnessTexture": true,
+      "hasNormalTexture": true,
+      "hasOcclusionTexture": false
+    },
+    "primitiveCount": 13,
+    "sceneGraphFallback": false,
+    "textureCount": 34,
+    "textureResolutions": [
+      {
+        "bytes": 26737010,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "TEXTURA_NORMAL",
+        "width": 4096
+      },
+      {
+        "bytes": 19916345,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "TEXTURA",
+        "width": 4096
+      },
+      {
+        "bytes": 233137,
+        "height": 512,
+        "mimeType": "image/png",
+        "name": "7.62x39_bullet_casing_low_Material_Normal",
+        "width": 512
+      },
+      {
+        "bytes": 86933,
+        "height": 512,
+        "mimeType": "image/png",
+        "name": "7.62x39_bullet_casing_low_Material_BaseCol",
+        "width": 512
+      },
+      {
+        "bytes": 280047,
+        "height": 512,
+        "mimeType": "image/png",
+        "name": "7.62x39_bullet_low_Material_Normal",
+        "width": 512
+      },
+      {
+        "bytes": 4631,
+        "height": 512,
+        "mimeType": "image/png",
+        "name": "7.62x39_bullet_low_Material_BaseColor",
+        "width": 512
+      },
+      {
+        "bytes": 150792,
+        "height": 512,
+        "mimeType": "image/png",
+        "name": "7.62x39_bullet_low_Material_Metallic-7.62x39_bullet_low_Material_Roughness",
+        "width": 512
+      },
+      {
+        "bytes": 6160415,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_magazine_low_Material.004_Normal",
+        "width": 2048
+      },
+      {
+        "bytes": 2763264,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_magazine_low_Material.004_BaseColor",
+        "width": 2048
+      },
+      {
+        "bytes": 2458632,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_magazine_low_Material.004_Metallic-AK47_magazine_low_Material.004_Roughness",
+        "width": 2048
+      },
+      {
+        "bytes": 6381108,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_reciever_low_Material.010_Normal",
+        "width": 2048
+      },
+      {
+        "bytes": 543249,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_reciever_low_Material.010_BaseColor",
+        "width": 2048
+      },
+      {
+        "bytes": 1616076,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_reciever_low_Material.010_Metallic-AK47_reciever_low_Material.010_Roughness",
+        "width": 2048
+      },
+      {
+        "bytes": 2756209,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "AK47_rear_sight_block_low_Material.009_Nor",
+        "width": 1024
+      },
+      {
+        "bytes": 203105,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "AK47_rear_sight_block_low_Material.009_Bas",
+        "width": 1024
+      },
+      {
+        "bytes": 637678,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "AK47_rear_sight_block_low_Material.009_Rou",
+        "width": 1024
+      },
+      {
+        "bytes": 13129444,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_stock_low_Material.003_Normal",
+        "width": 2048
+      },
+      {
+        "bytes": 4921739,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_stock_low_Material.003_BaseColor",
+        "width": 2048
+      },
+      {
+        "bytes": 64132,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_stock_low_Material.003_Metallic",
+        "width": 2048
+      },
+      {
+        "bytes": 7756064,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_barrel_low_Material.014_Normal",
+        "width": 2048
+      },
+      {
+        "bytes": 563415,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_barrel_low_Material.014_BaseColor",
+        "width": 2048
+      },
+      {
+        "bytes": 2824897,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_barrel_low_Material.014_Metallic-AK47_barrel_low_Material.014_Roughness",
+        "width": 2048
+      },
+      {
+        "bytes": 10630012,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_handgaurd_retainer_low_Material.012_N",
+        "width": 2048
+      },
+      {
+        "bytes": 417047,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_handgaurd_retainer_low_Material.012_B",
+        "width": 2048
+      },
+      {
+        "bytes": 1667792,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_handgaurd_retainer_low_Material.012_R",
+        "width": 2048
+      },
+      {
+        "bytes": 3329922,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "AK47_upper_handgaurd_low_Material.008_Norm",
+        "width": 1024
+      },
+      {
+        "bytes": 1391588,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "AK47_upper_handgaurd_low_Material.008_Base",
+        "width": 1024
+      },
+      {
+        "bytes": 825324,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "AK47_upper_handgaurd_low_Material.008_Meta-AK47_upper_handgaurd_low_Material.008_Roug",
+        "width": 1024
+      },
+      {
+        "bytes": 10161947,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_lower_handgaurd_low_Material.007_Norm",
+        "width": 2048
+      },
+      {
+        "bytes": 3465417,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_lower_handgaurd_low_Material.007_Base",
+        "width": 2048
+      },
+      {
+        "bytes": 2323355,
+        "height": 2048,
+        "mimeType": "image/png",
+        "name": "AK47_lower_handgaurd_low_Material.007_Meta-AK47_lower_handgaurd_low_Material.007_Roug",
+        "width": 2048
+      },
+      {
+        "bytes": 3847727,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "AK47_handgrip_low_Material.011_Normal",
+        "width": 1024
+      },
+      {
+        "bytes": 1516524,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "AK47_handgrip_low_Material.011_BaseColor",
+        "width": 1024
+      },
+      {
+        "bytes": 842977,
+        "height": 1024,
+        "mimeType": "image/png",
+        "name": "AK47_handgrip_low_Material.011_Metallic-AK47_handgrip_low_Material.011_Roughness",
+        "width": 1024
+      }
+    ],
+    "triangleCount": 75860,
+    "undrawnMeshCount": 0,
+    "undrawnPrimitiveCount": 0,
+    "undrawnTriangleCount": 0,
+    "vertexCount": 61985,
+    "warnings": [
+      "texture is below 1024px on an axis and will blur at close range: 7.62x39_bullet_casing_low_Material_Normal (512x512), 7.62x39_bullet_casing_low_Material_BaseCol (512x512), 7.62x39_bullet_low_Material_Normal (512x512), 7.62x39_bullet_low_Material_BaseColor (512x512) (+1 more)"
+    ]
+  },
+  "license": "CC-BY-4.0",
+  "schema": "game_dev.asset_metadata.v1"
+}

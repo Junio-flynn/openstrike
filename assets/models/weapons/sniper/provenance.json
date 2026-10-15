@@ -1,0 +1,11 @@
+{
+  "notes": "Sketchfab CC Attribution listing.",
+  "origin": "imported",
+  "schema": "game_dev.asset_provenance.v1",
+  "source": {
+    "bytes": 62884748,
+    "fileName": "sniper.glb",
+    "sha256": "fbed131fa129693f7040b7e87aeb11061699204f7fb7cd9d0409e380b65e60d8"
+  },
+  "sourceUri": "https://sketchfab.com/3d-models/sniper-fps-animation-f5174e499bff4d96b528c891b08c2015"
+}

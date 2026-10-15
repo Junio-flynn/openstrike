@@ -1,0 +1,102 @@
+{
+  "policy": {},
+  "report": {
+    "checks": [
+      {
+        "actual": "every primitive has TEXCOORD_0",
+        "consequence": "Without UVs the mesh cannot be textured at all — not by a generator, not by hand.",
+        "expected": "every primitive carries UV coordinates",
+        "id": "uvs_present",
+        "passed": true,
+        "severity": "error"
+      },
+      {
+        "actual": "every primitive has NORMAL",
+        "consequence": "Missing normals leave lighting to a renderer guess, usually reading as faceted or black.",
+        "expected": "every primitive carries normals",
+        "id": "normals_present",
+        "passed": true,
+        "severity": "error"
+      },
+      {
+        "actual": "tangents present",
+        "consequence": "A normal map without tangents is sampled against a guessed basis, so the surface lights wrongly in a way that looks like a shading bug rather than a missing attribute.",
+        "expected": "tangents whenever a normal map is bound",
+        "id": "tangents_for_normal_map",
+        "passed": true,
+        "severity": "error"
+      },
+      {
+        "actual": "75860 triangles",
+        "consequence": "Over budget costs frame time on every instance drawn.",
+        "expected": "at most 200000",
+        "id": "triangle_budget",
+        "passed": true,
+        "severity": "error"
+      },
+      {
+        "actual": "13 materials",
+        "consequence": "Each material is a separate draw call unless the pipeline batches them.",
+        "expected": "at most 16",
+        "id": "material_count",
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "actual": "5 texture(s) below 1024px (smallest 512px)",
+        "consequence": "Under-resolution textures blur under close inspection and cannot be sharpened later.",
+        "expected": "every texture at least 1024px on its shortest edge",
+        "id": "texture_resolution",
+        "passed": false,
+        "severity": "warning"
+      },
+      {
+        "actual": "all textures power-of-two",
+        "consequence": "Non-power-of-two textures can lose mipmapping or block compression on some targets.",
+        "expected": "power-of-two dimensions",
+        "id": "power_of_two_textures",
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "actual": "2.000 x 2.000 x 2.000 m",
+        "consequence": "Non-finite bounds produce a NaN view matrix in anything that frames the asset.",
+        "expected": "finite bounds",
+        "id": "bounding_box_finite",
+        "passed": true,
+        "severity": "error"
+      },
+      {
+        "actual": "largest edge 2.000 m",
+        "consequence": "An asset far larger than expected usually means the export used the wrong unit scale.",
+        "expected": "at most 1000 m",
+        "id": "max_dimension",
+        "passed": true,
+        "severity": "warning"
+      },
+      {
+        "actual": "smallest edge 2.000000 m",
+        "consequence": "A collapsed axis means the mesh is flat or empty, whatever its triangle count says.",
+        "expected": "at least 0.001 m",
+        "id": "min_dimension",
+        "passed": true,
+        "severity": "error"
+      },
+      {
+        "actual": "75860 triangles",
+        "consequence": "A file can parse cleanly and still contain nothing to draw.",
+        "expected": "at least one triangle",
+        "id": "has_geometry",
+        "passed": true,
+        "severity": "error"
+      }
+    ],
+    "errorCount": 0,
+    "inspectorWarnings": [
+      "texture is below 1024px on an axis and will blur at close range: 7.62x39_bullet_casing_low_Material_Normal (512x512), 7.62x39_bullet_casing_low_Material_BaseCol (512x512), 7.62x39_bullet_low_Material_Normal (512x512), 7.62x39_bullet_low_Material_BaseColor (512x512) (+1 more)"
+    ],
+    "passed": true,
+    "warningCount": 1
+  },
+  "schema": "game_dev.asset_validation.v1"
+}

@@ -6,8 +6,8 @@
 import { createSignal } from "solid-js";
 import { strike } from "./sdk.ts";
 
-/** Freeze time before a round goes live (seconds). */
-export const ROUND_FREEZE = 1.2;
+/** Freeze time before a round goes live so players can choose a weapon. */
+export const ROUND_FREEZE = 5;
 
 // Weapon behavior remains product-owned. Solo play is an empty-map
 // movement and shooting sandbox.
@@ -41,7 +41,11 @@ strike.onTick((s) => {
   }
   setPhaseAge(s.time - phaseStart);
 
-  if (s.phase === "starting" && s.time - phaseStart >= ROUND_FREEZE) {
+  if (
+    s.phase === "starting" &&
+    s.time - phaseStart >= ROUND_FREEZE &&
+    s.primaryWeaponSlot != null
+  ) {
     strike.setPhase("live");
   }
 });

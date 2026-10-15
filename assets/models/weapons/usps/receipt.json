@@ -1,0 +1,23 @@
+{
+  "completedAt": "2026-10-14T04:09:38.296Z",
+  "destination": {
+    "assetId": "usps",
+    "version": "1.0.0"
+  },
+  "evidence": {
+    "blenderNormalizationPerformed": false,
+    "gpuImportTestPerformed": false,
+    "humanVisualReviewPerformed": false,
+    "modelBytesCopiedAndHashed": true,
+    "policyValidationCompleted": true,
+    "staticInspectionCompleted": true
+  },
+  "manifestSha256": "a8b74a56b17fbe89c7cfac242e8fd834487c3795e80ea564f800a506c9a09154",
+  "packageId": "pkg_99fc998d1e543d0acd7bd9dd",
+  "schema": "game_dev.package_receipt.v1",
+  "source": {
+    "bytes": 46815112,
+    "fileName": "usp-s.glb",
+    "sha256": "e9663f576759de85fdd16fa43123d0e964eee26b82846d62d2c78acc58b5b86f"
+  }
+}

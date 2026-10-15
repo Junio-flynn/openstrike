@@ -1,0 +1,23 @@
+{
+  "completedAt": "2026-10-14T04:09:32.403Z",
+  "destination": {
+    "assetId": "ak12",
+    "version": "1.0.0"
+  },
+  "evidence": {
+    "blenderNormalizationPerformed": false,
+    "gpuImportTestPerformed": false,
+    "humanVisualReviewPerformed": false,
+    "modelBytesCopiedAndHashed": true,
+    "policyValidationCompleted": true,
+    "staticInspectionCompleted": true
+  },
+  "manifestSha256": "99a40187cc0230e561cfc603fcc4f3bb96cc70c644b8cdf54ed3eff8b0eab552",
+  "packageId": "pkg_b5c36b3fb40f033bcc95161f",
+  "schema": "game_dev.package_receipt.v1",
+  "source": {
+    "bytes": 2258172,
+    "fileName": "ak12.glb",
+    "sha256": "74d51e4f2388bf00250c1d065eaf4975d2314a1d4ed8771cd649ac15bfe8556d"
+  }
+}

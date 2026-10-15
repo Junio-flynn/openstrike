@@ -1,0 +1,79 @@
+{
+  "assetId": "usps",
+  "category": "weapon",
+  "description": "First-person weapon viewmodel for OpenStrike. Converted from the downloaded Sketchfab source archive. Source: https://sketchfab.com/3d-models/pistol-usp-s-weapon-model-cs2-5e0c452b1e2e4d7c9ea80638a94afaac",
+  "displayName": "USPS",
+  "inspection": {
+    "animationCount": 48,
+    "boundingBox": {
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "sizeMeters": [
+        2,
+        2,
+        2
+      ]
+    },
+    "boundingBoxEmpty": false,
+    "fileBytes": 46815112,
+    "filePath": "model.glb",
+    "generator": "glTF-Transform v4.5.1",
+    "hasNormals": true,
+    "hasSkin": true,
+    "hasTangents": true,
+    "hasUVs": true,
+    "materialCount": 2,
+    "meshCount": 2,
+    "pbr": {
+      "hasBaseColorTexture": true,
+      "hasEmissiveTexture": false,
+      "hasMetallicRoughnessTexture": true,
+      "hasNormalTexture": true,
+      "hasOcclusionTexture": true
+    },
+    "primitiveCount": 2,
+    "sceneGraphFallback": false,
+    "textureCount": 3,
+    "textureResolutions": [
+      {
+        "bytes": 15930468,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "usp_silencer_default_normal_tga_61d8e869",
+        "width": 4096
+      },
+      {
+        "bytes": 14037795,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "usp_silencer_default_ao_tga_dcc4bd00_orm_580668222",
+        "width": 4096
+      },
+      {
+        "bytes": 15305213,
+        "height": 4096,
+        "mimeType": "image/png",
+        "name": "usp_silencer_default_color_psd_eff328d8",
+        "width": 4096
+      }
+    ],
+    "triangleCount": 18930,
+    "undrawnMeshCount": 0,
+    "undrawnPrimitiveCount": 0,
+    "undrawnTriangleCount": 0,
+    "vertexCount": 16009,
+    "warnings": [
+      "glTF reader: Missing optional extension, \"KHR_materials_specular\"."
+    ]
+  },
+  "license": "CC-BY-4.0",
+  "schema": "game_dev.asset_metadata.v1"
+}

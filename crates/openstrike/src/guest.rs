@@ -34,11 +34,12 @@ pub struct StrikeGuest {
     ui: UiSurface,
     commands: Rc<RefCell<Vec<Command>>>,
     paused: Rc<Cell<bool>>,
+    mouse_cursor_unlocked: Rc<Cell<bool>>,
     mouse_sensitivity: Rc<Cell<f32>>,
     scope_multiplier: Rc<Cell<f32>>,
     control_scheme: Rc<Cell<u8>>,
     keybindings: Rc<RefCell<[[u8; 2]; 8]>>,
-    viewmodel_settings: Rc<RefCell<[[f32; 6]; 4]>>,
+    viewmodel_settings: Rc<RefCell<[[f32; 6]; 16]>>,
     player_name: Rc<RefCell<String>>,
     quit_requested: Rc<Cell<bool>>,
     lobby_requests: Rc<RefCell<Vec<LobbyRequest>>>,
@@ -97,6 +98,7 @@ impl StrikeGuest {
 
         let commands: Rc<RefCell<Vec<Command>>> = Rc::new(RefCell::new(Vec::new()));
         let paused = Rc::new(Cell::new(false));
+        let mouse_cursor_unlocked = Rc::new(Cell::new(false));
         let mouse_sensitivity = Rc::new(Cell::new(1.0));
         let scope_multiplier = Rc::new(Cell::new(1.0));
         let control_scheme = Rc::new(Cell::new(0));
@@ -110,7 +112,7 @@ impl StrikeGuest {
             [14, 0],
             [13, 0],
         ]));
-        let viewmodel_settings = Rc::new(RefCell::new([[2.2, 0.0, 0.0, 0.0, 0.0, 0.0]; 4]));
+        let viewmodel_settings = Rc::new(RefCell::new([[2.2, 0.0, 0.0, 0.0, 0.0, 0.0]; 16]));
         let player_name = Rc::new(RefCell::new(initial_player_name.to_owned()));
         let quit_requested = Rc::new(Cell::new(false));
         let lobby_requests = Rc::new(RefCell::new(Vec::new()));
@@ -119,6 +121,7 @@ impl StrikeGuest {
             &guest,
             &commands,
             &paused,
+            &mouse_cursor_unlocked,
             &mouse_sensitivity,
             &scope_multiplier,
             &control_scheme,
@@ -149,6 +152,7 @@ impl StrikeGuest {
             ui,
             commands,
             paused,
+            mouse_cursor_unlocked,
             mouse_sensitivity,
             scope_multiplier,
             control_scheme,
@@ -232,6 +236,10 @@ impl StrikeGuest {
         self.paused.get()
     }
 
+    pub fn mouse_cursor_unlocked(&self) -> bool {
+        self.mouse_cursor_unlocked.get()
+    }
+
     pub fn mouse_sensitivity(&self) -> f32 {
         self.mouse_sensitivity.get()
     }
@@ -248,7 +256,7 @@ impl StrikeGuest {
         *self.keybindings.borrow()
     }
 
-    pub fn viewmodel_settings(&self) -> [[f32; 6]; 4] {
+    pub fn viewmodel_settings(&self) -> [[f32; 6]; 16] {
         *self.viewmodel_settings.borrow()
     }
 
@@ -359,11 +367,34 @@ fn build_state<'js>(
     o.set("phase", phase_name(game.phase))?;
     o.set("hp", game.player.health)?;
     o.set("alive", game.player.alive)?;
-    o.set("ammo", game.weapon.ammo)?;
-    o.set("reserve", game.weapon.reserve)?;
+    o.set(
+        "ammo",
+        if game.weapon_equipped {
+            game.weapon.ammo
+        } else {
+            0
+        },
+    )?;
+    o.set(
+        "reserve",
+        if game.weapon_equipped {
+            game.weapon.reserve
+        } else {
+            0
+        },
+    )?;
     o.set("magSize", game.weapon.cfg.mag_size)?;
+    o.set("weaponEquipped", game.weapon_equipped)?;
     o.set("weaponName", game.weapon_name())?;
     o.set("weaponSlot", game.active_weapon as u32)?;
+    o.set(
+        "primaryWeaponSlot",
+        game.primary_weapon_slot.map(|slot| slot as u32),
+    )?;
+    o.set(
+        "secondaryWeaponSlot",
+        game.secondary_weapon_slot.map(|slot| slot as u32),
+    )?;
     o.set("aimFraction", game.aim_fraction_interpolated(1.0) as f64)?;
     o.set("reloading", game.weapon.reloading())?;
     let reload_frac = if game.weapon.reloading() {
@@ -435,11 +466,12 @@ fn mount_strike(
     guest: &Guest,
     commands: &Rc<RefCell<Vec<Command>>>,
     paused: &Rc<Cell<bool>>,
+    mouse_cursor_unlocked: &Rc<Cell<bool>>,
     mouse_sensitivity: &Rc<Cell<f32>>,
     scope_multiplier: &Rc<Cell<f32>>,
     control_scheme: &Rc<Cell<u8>>,
     keybindings: &Rc<RefCell<[[u8; 2]; 8]>>,
-    viewmodel_settings: &Rc<RefCell<[[f32; 6]; 4]>>,
+    viewmodel_settings: &Rc<RefCell<[[f32; 6]; 16]>>,
     player_name: &Rc<RefCell<String>>,
     quit_requested: &Rc<Cell<bool>>,
     lobby_requests: &Rc<RefCell<Vec<LobbyRequest>>>,
@@ -515,6 +547,9 @@ fn mount_strike(
             .push(LobbyRequest::Leave));
         let pause_state = paused.clone();
         op!("setPaused", move |value: bool| pause_state.set(value));
+        let cursor_state = mouse_cursor_unlocked.clone();
+        op!("setMouseCursorUnlocked", move |value: bool| cursor_state
+            .set(value));
         let sensitivity_state = mouse_sensitivity.clone();
         op!("setMouseSensitivity", move |value: f32| {
             sensitivity_state.set(value.clamp(0.1, 3.0))
@@ -546,7 +581,7 @@ fn mount_strike(
                     yaw.clamp(-60.0, 60.0),
                     pitch.clamp(-60.0, 60.0),
                 ];
-                if (0..4).contains(&slot) {
+                if (0..16).contains(&slot) {
                     log::debug!("viewmodel slot {slot} settings updated: {settings:?}");
                     viewmodel_state.borrow_mut()[slot as usize] = settings;
                 }
@@ -593,7 +628,7 @@ fn mount_strike(
 
         let q = commands.clone();
         op!("selectWeapon", move |slot: i32| {
-            if (0..4).contains(&slot) {
+            if (0..16).contains(&slot) {
                 q.borrow_mut().push(Command::SelectWeapon(slot as usize));
             }
         });
